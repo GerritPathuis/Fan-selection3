@@ -1293,20 +1293,18 @@ Public Class Form1
         Return (Mach)
     End Function
 
-
     Function kin_visco_air(temp As Double)
         Dim visco As Double
 
         '--------- Kinematic viscosity air[m2/s]
         '-----Kinematic viscosity = dynamic/density------------------
         ' Formula valid from -200 to +400 celcius------------------
-        If temp > 400 Then MessageBox.Show("kin_visco_air(temp) too high (T > 400)")
-        If temp < -200 Then MessageBox.Show("kin_visco_air(temp) too low (T < -200)")
+        If temp > 750 Then MessageBox.Show("kin_visco_air(temp) too high (T > 750)")
+        If temp < -98 Then MessageBox.Show("kin_visco_air(temp) too low (T < -98)")
 
-        temp = temp + 273.15
-        visco = 0.00009 * temp ^ 2 + 0.0351 * temp - 2.9294
+        visco = 0.00000640107144093 * temp ^ 2 + 0.00960770352784275 * temp + 1.33719648393531
 
-        visco = visco * 10 ^ -6
+        visco = visco * 10 ^ -5
         Return (visco)
     End Function
 
