@@ -678,6 +678,7 @@ Partial Class Form1
         Me.Label102 = New System.Windows.Forms.Label()
         Me.TextBox112 = New System.Windows.Forms.TextBox()
         Me.TabPage6 = New System.Windows.Forms.TabPage()
+        Me.TextBox380 = New System.Windows.Forms.TextBox()
         Me.TextBox282 = New System.Windows.Forms.TextBox()
         Me.GroupBox24 = New System.Windows.Forms.GroupBox()
         Me.NumericUpDown77 = New System.Windows.Forms.NumericUpDown()
@@ -1052,6 +1053,7 @@ Partial Class Form1
         Me.NumericUpDown78 = New System.Windows.Forms.NumericUpDown()
         Me.Button21 = New System.Windows.Forms.Button()
         Me.TextBox287 = New System.Windows.Forms.TextBox()
+        Me.Button23 = New System.Windows.Forms.Button()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.GroupBox35.SuspendLayout()
@@ -4092,6 +4094,7 @@ Partial Class Form1
         '
         'TabPage2
         '
+        Me.TabPage2.Controls.Add(Me.Button23)
         Me.TabPage2.Controls.Add(Me.GroupBox61)
         Me.TabPage2.Controls.Add(Me.GroupBox60)
         Me.TabPage2.Controls.Add(Me.GroupBox30)
@@ -5223,7 +5226,7 @@ Partial Class Form1
         '
         Me.Button2.Location = New System.Drawing.Point(405, 599)
         Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(467, 43)
+        Me.Button2.Size = New System.Drawing.Size(231, 43)
         Me.Button2.TabIndex = 28
         Me.Button2.Text = "Reken"
         Me.Button2.UseVisualStyleBackColor = True
@@ -8392,6 +8395,7 @@ Partial Class Form1
         '
         'TabPage6
         '
+        Me.TabPage6.Controls.Add(Me.TextBox380)
         Me.TabPage6.Controls.Add(Me.TextBox282)
         Me.TabPage6.Controls.Add(Me.GroupBox24)
         Me.TabPage6.Controls.Add(Me.RichTextBox1)
@@ -8417,6 +8421,18 @@ Partial Class Form1
         Me.TabPage6.TabIndex = 5
         Me.TabPage6.Text = "Achtergrond"
         Me.TabPage6.UseVisualStyleBackColor = True
+        '
+        'TextBox380
+        '
+        Me.TextBox380.Enabled = False
+        Me.TextBox380.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TextBox380.Location = New System.Drawing.Point(422, 368)
+        Me.TextBox380.Multiline = True
+        Me.TextBox380.Name = "TextBox380"
+        Me.TextBox380.Size = New System.Drawing.Size(377, 98)
+        Me.TextBox380.TabIndex = 100
+        Me.TextBox380.Text = "Blowers" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "For clean air no dust, no droplets" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "www.aerzen.com" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Zijkanaalpopen Can" &
+    " handle some dust and droplets" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "www.gd-elmorietschle.com"
         '
         'TextBox282
         '
@@ -9090,10 +9106,10 @@ Partial Class Form1
         '
         Me.TextBox141.Enabled = False
         Me.TextBox141.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TextBox141.Location = New System.Drawing.Point(422, 383)
+        Me.TextBox141.Location = New System.Drawing.Point(422, 472)
         Me.TextBox141.Multiline = True
         Me.TextBox141.Name = "TextBox141"
-        Me.TextBox141.Size = New System.Drawing.Size(377, 189)
+        Me.TextBox141.Size = New System.Drawing.Size(377, 100)
         Me.TextBox141.TabIndex = 6
         Me.TextBox141.Text = resources.GetString("TextBox141.Text")
         '
@@ -12665,6 +12681,15 @@ Partial Class Form1
         Me.TextBox287.TabIndex = 107
         Me.TextBox287.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
+        'Button23
+        '
+        Me.Button23.Location = New System.Drawing.Point(642, 599)
+        Me.Button23.Name = "Button23"
+        Me.Button23.Size = New System.Drawing.Size(231, 43)
+        Me.Button23.TabIndex = 51
+        Me.Button23.Text = "Print to Word"
+        Me.Button23.UseVisualStyleBackColor = True
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -13934,4 +13959,6 @@ Partial Class Form1
     Friend WithEvents Label374 As Label
     Friend WithEvents NumericUpDown84 As NumericUpDown
     Friend WithEvents Label375 As Label
+    Friend WithEvents TextBox380 As TextBox
+    Friend WithEvents Button23 As Button
 End Class

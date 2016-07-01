@@ -3970,6 +3970,196 @@ Public Class Form1
         TextBox287.Text = Round(Total, 2).ToString
     End Sub
 
+    Private Sub TextBox380_TextChanged(sender As Object, e As EventArgs) Handles TextBox380.TextChanged
+
+    End Sub
+    Private Sub Button23_Click(sender As Object, e As EventArgs) Handles Button23.Click
+        Dim oWord As Word.Application
+        Dim oDoc As Word.Document
+        Dim oTable As Word.Table
+        Dim oPara1, oPara2 As Word.Paragraph
+
+        'Start Word and open the document template. 
+        oWord = CreateObject("Word.Application")
+        oWord.Visible = True
+        oDoc = oWord.Documents.Add
+
+        'Insert a paragraph at the beginning of the document. 
+        oPara1 = oDoc.Content.Paragraphs.Add
+        oPara1.Range.Text = "VTK Engineering"
+        oPara1.Range.Font.Name = "Arial"
+        oPara1.Range.Font.Size = 16
+        oPara1.Range.Font.Bold = True
+        oPara1.Format.SpaceAfter = 2                '24 pt spacing after paragraph. 
+        oPara1.Range.InsertParagraphAfter()
+
+        oPara2 = oDoc.Content.Paragraphs.Add(oDoc.Bookmarks.Item("\endofdoc").Range)
+        oPara2.Range.Font.Size = 11
+        oPara2.Format.SpaceAfter = 1
+        oPara2.Range.Font.Bold = False
+        oPara2.Range.Text = "Data overview of stress calculations of impeller" & vbCrLf
+        oPara2.Range.InsertParagraphAfter()
+
+        '----------------------------------------------
+        'Insert a table, fill it with data and change the column widths.
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 6, 2)
+        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable.Range.Font.Size = 9
+        oTable.Range.Font.Bold = False
+        oTable.Rows.Item(1).Range.Font.Bold = True
+
+        oTable.Cell(1, 1).Range.Text = "Project Name"
+        oTable.Cell(1, 2).Range.Text = TextBox284.Text
+        oTable.Cell(2, 1).Range.Text = "Project number "
+        oTable.Cell(2, 2).Range.Text = TextBox283.Text
+        oTable.Cell(3, 1).Range.Text = "Author "
+        oTable.Cell(3, 2).Range.Text = Environment.UserName
+        oTable.Cell(4, 1).Range.Text = "Date "
+        oTable.Cell(4, 2).Range.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        oTable.Cell(5, 1).Range.Text = ""
+        oTable.Cell(6, 1).Range.Text = ""
+
+        oTable.Columns.Item(1).Width = oWord.InchesToPoints(2.5)   'Change width of columns 1 & 2.
+        oTable.Columns.Item(2).Width = oWord.InchesToPoints(2)
+        oTable.Rows.Item(1).Range.Font.Bold = True
+        oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
+
+        '----------------------------------------------
+        'Insert a 14 x 5 table, fill it with data and change the column widths.
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 38, 3)
+        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable.Range.Font.Size = 9
+        oTable.Range.Font.Bold = False
+        oTable.Rows.Item(1).Range.Font.Bold = True
+
+
+        oTable.Cell(1, 1).Range.Text = "Materiaal keuze"
+
+        oTable.Cell(2, 1).Range.Text = "~ Materiaal waaier"
+        oTable.Cell(2, 2).Range.Text = ComboBox3.Text
+
+        oTable.Cell(3, 1).Range.Text = "~ Waaier temperatuur"
+        oTable.Cell(3, 2).Range.Text = NumericUpDown18.Value
+        oTable.Cell(3, 3).Range.Text = "[°C]"
+
+        oTable.Cell(4, 1).Range.Text = "Max. toegestane treksterkte"
+        oTable.Cell(4, 2).Range.Text = TextBox40.Text
+        oTable.Cell(4, 3).Range.Text = "[N/mm2]"
+
+
+        oTable.Rows.Item(6).Range.Font.Bold = True
+        oTable.Cell(6, 1).Range.Text = "Aandrijving"
+
+        oTable.Cell(7, 1).Range.Text = "~ Toerental"
+        oTable.Cell(7, 2).Range.Text = NumericUpDown19.Value
+        oTable.Cell(7, 3).Range.Text = "[rpm]"
+
+        '---- -----
+        oTable.Rows.Item(9).Range.Font.Bold = True
+        oTable.Cell(9, 1).Range.Text = "Spanning plaat-schoepen (ingeklemd)"
+
+        oTable.Cell(10, 1).Range.Text = "~ Dikte schoep"
+        oTable.Cell(10, 2).Range.Text = NumericUpDown20.Value
+        oTable.Cell(10, 3).Range.Text = "[mm]"
+
+        oTable.Cell(11, 1).Range.Text = "Berekende spanning"
+        oTable.Cell(11, 2).Range.Text = TextBox43.Text
+        oTable.Cell(11, 3).Range.Text = "[N/mm2]"
+
+        '---- -----
+        oTable.Rows.Item(13).Range.Font.Bold = True
+        oTable.Cell(13, 1).Range.Text = "Waaier afmetingen"
+
+        oTable.Cell(14, 1).Range.Text = "~ Diameter waaier"
+        oTable.Cell(14, 2).Range.Text = NumericUpDown21.Value
+        oTable.Cell(14, 3).Range.Text = "[mm]"
+
+        oTable.Cell(15, 1).Range.Text = "~ Dikte bodemschijf"
+        oTable.Cell(15, 2).Range.Text = NumericUpDown17.Value
+        oTable.Cell(15, 3).Range.Text = "[mm]"
+
+        oTable.Cell(16, 1).Range.Text = "~ Dikte voorplaat"
+        oTable.Cell(16, 2).Range.Text = NumericUpDown31.Value
+        oTable.Cell(16, 3).Range.Text = "[mm]"
+
+        '---- naaf afmetingen---------
+        oTable.Cell(17, 1).Range.Text = "~ Naaf diameter D"
+        oTable.Cell(17, 2).Range.Text = NumericUpDown28.Value
+        oTable.Cell(17, 3).Range.Text = "[mm]"
+
+        oTable.Cell(18, 1).Range.Text = "~ Naaf dikte"
+        oTable.Cell(18, 2).Range.Text = NumericUpDown29.Value
+        oTable.Cell(18, 3).Range.Text = "[mm]"
+
+        '---- gewichten---------
+        oTable.Cell(19, 1).Range.Text = "~ Koppeling helft/pulley"
+        oTable.Cell(19, 2).Range.Text = NumericUpDown30.Value
+        oTable.Cell(19, 3).Range.Text = "[kg]"
+
+        oTable.Cell(20, 1).Range.Text = "~ Las toevoegmateriaal"
+        oTable.Cell(20, 2).Range.Text = NumericUpDown11.Value
+        oTable.Cell(20, 3).Range.Text = "[kg]"
+
+        oTable.Cell(21, 1).Range.Text = "Totaal gewicht waaier"
+        oTable.Cell(21, 2).Range.Text = TextBox192.Text
+        oTable.Cell(21, 3).Range.Text = "[kg]"
+
+        oTable.Rows.Item(23).Range.Font.Bold = True
+        oTable.Cell(23, 1).Range.Text = "Spanning waaier bodemschijf"
+
+        oTable.Cell(24, 1).Range.Text = "Berekende spanning"
+        oTable.Cell(24, 2).Range.Text = TextBox32.Text
+        oTable.Cell(24, 3).Range.Text = "[N/mm2]"
+
+        oTable.Rows.Item(26).Range.Font.Bold = True
+        oTable.Cell(26, 1).Range.Text = "Kritisch toerental as enkelzijdig gelagerd"
+
+        oTable.Cell(27, 1).Range.Text = "Eigenfrequentie bij 15% safety"
+        oTable.Cell(27, 2).Range.Text = TextBox47.Text
+        oTable.Cell(27, 3).Range.Text = "[rpm]"
+
+        oTable.Rows.Item(29).Range.Font.Bold = True
+        oTable.Cell(29, 1).Range.Text = "Bodemschijf natural frequency"
+
+        oTable.Cell(30, 1).Range.Text = "1ste Eigenfrequentie staal"
+        oTable.Cell(30, 2).Range.Text = TextBox211.Text
+        oTable.Cell(30, 3).Range.Text = "[rpm]"
+
+        oTable.Rows.Item(32).Range.Font.Bold = True
+        oTable.Cell(32, 1).Range.Text = "Spanning airfoil (T33, T34)"
+
+        oTable.Cell(33, 1).Range.Text = "~ Airfoil hoogte uitwendig"
+        oTable.Cell(33, 2).Range.Text = NumericUpDown2.Value
+        oTable.Cell(33, 3).Range.Text = "[mm]"
+
+        oTable.Cell(34, 1).Range.Text = "~ Airfoil skin plaatdikte"
+        oTable.Cell(34, 2).Range.Text = NumericUpDown39.Value
+        oTable.Cell(34, 3).Range.Text = "[mm]"
+
+        oTable.Cell(35, 1).Range.Text = "~ Rib afstand cl-cl"
+        oTable.Cell(35, 2).Range.Text = NumericUpDown40.Value
+        oTable.Cell(35, 3).Range.Text = "[mm]"
+
+        oTable.Cell(36, 1).Range.Text = "~ Rib plaatdikte"
+        oTable.Cell(36, 2).Range.Text = NumericUpDown41.Value
+        oTable.Cell(36, 3).Range.Text = "[mm]"
+
+        oTable.Cell(37, 1).Range.Text = "Box tau+sigma"
+        oTable.Cell(37, 2).Range.Text = TextBox67.Text
+        oTable.Cell(37, 3).Range.Text = "[N/mm2]"
+
+        oTable.Cell(38, 1).Range.Text = "Skin tau+sigma"
+        oTable.Cell(38, 2).Range.Text = TextBox73.Text
+        oTable.Cell(38, 3).Range.Text = "[N/mm2]"
+
+
+        oTable.Columns.Item(1).Width = oWord.InchesToPoints(3.1)   'Change width of columns 1 & 2.
+        oTable.Columns.Item(2).Width = oWord.InchesToPoints(1.3)
+        oTable.Columns.Item(3).Width = oWord.InchesToPoints(0.8)
+        oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
+    End Sub
+
+
     Private Sub calc_emotor_4P()
         'see http://ecatalog.weg.net/files/wegnet/WEG-specification-of-electric-motors-50039409-manual-english.pdf
         'see http://electrical-engineering-portal.com/calculation-of-motor-starting-time-as-first-approximation
