@@ -991,9 +991,9 @@ Public Class Form1
         Dim sigma_bodemplaat As Double
         Dim V_omtrek As Double
         Dim n_actual As Double
-        Dim Voorplaat_keel, inw_schoep_dia, gewicht_naaf As Double
+        Dim Voorplaat_keel, inw_schoep_dia, gem_schoep_dia As Double
         Dim J1, J2, J3, J4, J_naaf, J_tot, j_as As Double
-        Dim dia_naaf, gewicht_as As Double
+        Dim dia_naaf, gewicht_naaf, gewicht_as As Double
         Dim length_naaf, gewicht_pulley As Double
         Dim sg_staal As Double
         Dim n_krit, Waaier_gewicht As Double
@@ -1034,7 +1034,6 @@ Public Class Form1
         labyrinth_gewicht = NumericUpDown32.Value                                                       'Labyrinth
         schoepen_gewicht = aantal_schoep * Sch_gewicht
 
-
         Double.TryParse(TextBox190.Text, gewicht_as)
         las_gewicht = NumericUpDown11.Value         '[kg] las toevoeg materiaal
 
@@ -1072,13 +1071,26 @@ Public Class Form1
         'MessageBox.Show("sg=" & sg_staal.ToString &" snelh=" & V_omtrek.ToString &" breed=" & Sch_breed.ToString &" dik=" & Sch_dik.ToString &" dia=" & Waaier_dia.ToString &" sigma=" & sigma_schoep.ToString)
 
         '------------------ Traagheid (0.5 x m x r2)-----------------
+        gem_schoep_dia = (Waaier_dia + Voorplaat_keel) / 2
         J1 = 0.5 * Bodem_gewicht * (0.5 * Waaier_dia) ^ 2
         J2 = 0.5 * Voorplaat_gewicht * ((0.5 * Waaier_dia) ^ 2 - (0.5 * Voorplaat_keel) ^ 2)
         J3 = 0.5 * labyrinth_gewicht * (0.5 * Voorplaat_keel) ^ 2
-        J4 = 0.5 * schoepen_gewicht * (0.5 * (Waaier_dia + Voorplaat_keel) / 2) ^ 2
-        J_naaf = 0.5 * gewicht_naaf * (dia_naaf / 2) ^ 2      'MassaTraagheid [kg.m2]
-        Double.TryParse(TextBox190.Text, j_as)
-        J_tot = J1 + J2 + J3 + J4 + J_naaf + j_as
+        J4 = 0.5 * schoepen_gewicht * (0.5 * gem_schoep_dia) ^ 2
+        J_naaf = 0.5 * gewicht_naaf * (0.5 * dia_naaf) ^ 2                'MassaTraagheid [kg.m2]
+
+        '------------------ J_as (0.5 x m x r2)-----------------
+        Double.TryParse(TextBox41.Text, j_as)
+        'dia_as = NumericUpDown26.Value / 1000
+        'j_as = 0.5 * gewicht_as * (0.5 * dia_as) ^ 2
+
+        '----------- J totaal ---------------------------------
+        If RadioButton5.Checked Then                'Enkelzijdige aanzuiging
+            J_tot = J1 + J2 + J3 + J4 + J_naaf + j_as
+            GroupBox20.Text = "Enkelzijdige waaier afmetingen"
+        Else                                         'Dubbelzijdige aanzuiging
+            J_tot = J1 + (J2 * 2) + J3 + (J4 * 2) + J_naaf + j_as
+            GroupBox20.Text = "Dubbelzijdige waaier afmetingen"
+        End If
 
 
         '------------ Eigen frequenties bodemplaat ---------------------------
@@ -1299,8 +1311,8 @@ Public Class Form1
         '--------- Kinematic viscosity air[m2/s]
         '-----Kinematic viscosity = dynamic/density------------------
         ' Formula valid from -200 to +400 celcius------------------
-        If temp > 750 Then MessageBox.Show("kin_visco_air(temp) too high (T > 750)")
-        If temp < -98 Then MessageBox.Show("kin_visco_air(temp) too low (T < -98)")
+        If temp > 750 Then temp = 750
+        If temp < -98 Then temp = -98
 
         visco = 0.00000640107144093 * temp ^ 2 + 0.00960770352784275 * temp + 1.33719648393531
 
@@ -1941,7 +1953,7 @@ Public Class Form1
 
         'Insert a paragraph at the beginning of the document. 
         oPara1 = oDoc.Content.Paragraphs.Add
-        oPara1.Range.Text = "VTK Engineering department"
+        oPara1.Range.Text = "VTK Engineering"
         oPara1.Range.Font.Name = "Arial"
         oPara1.Range.Font.Size = 16
         oPara1.Range.Font.Bold = True
@@ -3474,7 +3486,7 @@ Public Class Form1
 
         'Insert a paragraph at the beginning of the document. 
         oPara1 = oDoc.Content.Paragraphs.Add
-        oPara1.Range.Text = "VTK Engineering department"
+        oPara1.Range.Text = "VTK Engineering"
         oPara1.Range.Font.Name = "Arial"
         oPara1.Range.Font.Size = 16
         oPara1.Range.Font.Bold = True
