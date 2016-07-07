@@ -969,7 +969,7 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click, NumericUpDown19.ValueChanged, NumericUpDown17.ValueChanged, TextBox34.TextChanged, TabPage2.Enter, NumericUpDown20.ValueChanged, NumericUpDown21.ValueChanged, NumericUpDown32.ValueChanged, NumericUpDown31.ValueChanged, NumericUpDown30.ValueChanged, NumericUpDown29.ValueChanged, NumericUpDown28.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown41.ValueChanged, NumericUpDown40.ValueChanged, NumericUpDown39.ValueChanged, NumericUpDown2.ValueChanged
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click, NumericUpDown19.ValueChanged, NumericUpDown17.ValueChanged, TextBox34.TextChanged, TabPage2.Enter, NumericUpDown20.ValueChanged, NumericUpDown21.ValueChanged, NumericUpDown32.ValueChanged, NumericUpDown31.ValueChanged, NumericUpDown30.ValueChanged, NumericUpDown29.ValueChanged, NumericUpDown28.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown41.ValueChanged, NumericUpDown39.ValueChanged, NumericUpDown2.ValueChanged, NumericUpDown81.ValueChanged, RadioButton38.CheckedChanged, RadioButton37.CheckedChanged
         Calc_stress_impeller()
     End Sub
 
@@ -981,8 +981,8 @@ Public Class Form1
         Dim Waaier_dia, Waaier_dik, Waaier_as_gewicht, las_gewicht As Double   'Zonder naaf
         Dim labyrinth_gewicht As Double
         Dim Sch_breed As Double                                             'Schoep breed
-        Dim Sch_dik, Sch_hoek, Sch_lengte, Sch_gewicht As Double            'Schoep_dik, Schoep_lang
-        Dim schoepen_gewicht, aantal_schoep As Double                       'Totaal schoepen gewicht
+        Dim Sch_dik, Sch_hoek, Sch_lengte, Plaat_Sch_gewicht As Double            'Schoep_dik, Schoep_lang
+        Dim Plaat_schoepen_gewicht, aantal_schoep As Double                       'Totaal schoepen gewicht
         Dim Bodem_gewicht As Double
         Dim Voorplaat_dik As Double
         Dim Voorplaat_gewicht As Double
@@ -992,7 +992,7 @@ Public Class Form1
         Dim V_omtrek As Double
         Dim n_actual As Double
         Dim Voorplaat_keel, inw_schoep_dia, gem_schoep_dia As Double
-        Dim J1, J2, J3, J4, J_naaf, J_tot, j_as As Double
+        Dim J1, J2, J3, J4, J5, J_naaf, J_tot, j_as As Double
         Dim dia_naaf, gewicht_naaf, gewicht_as As Double
         Dim length_naaf, gewicht_pulley As Double
         Dim sg_staal As Double
@@ -1026,13 +1026,15 @@ Public Class Form1
             Sch_dik = NumericUpDown20.Value / 1000 '[m]
             Sch_lengte = Tschets(T_type).Tdata(12) / 1000 * (Waaier_dia / 1.0)
             Sch_breed = Tschets(T_type).Tdata(15) / 1000 * (Waaier_dia / 1.0)           'Schoep breed uittrede [m]
-            Sch_gewicht = Sch_lengte * Sch_breed * Sch_dik * sg_staal
+            Plaat_Sch_gewicht = Sch_lengte * Sch_breed * Sch_dik * sg_staal             'Plaat schoepen
+            Plaat_schoepen_gewicht = aantal_schoep * Plaat_Sch_gewicht                  'Plaat schoepen
+
         End If
 
         Bodem_gewicht = PI / 4 * Waaier_dia ^ 2 * Waaier_dik * sg_staal                                 'Bodem gewicht
         Voorplaat_gewicht = PI / 4 * (Waaier_dia ^ 2 - Voorplaat_keel ^ 2) * Voorplaat_dik * sg_staal   'Voorplaat gewicht (zuig gat verwaarloosd)
         labyrinth_gewicht = NumericUpDown32.Value                                                       'Labyrinth
-        schoepen_gewicht = aantal_schoep * Sch_gewicht
+
 
         Double.TryParse(TextBox190.Text, gewicht_as)
         las_gewicht = NumericUpDown11.Value         '[kg] las toevoeg materiaal
@@ -1044,8 +1046,8 @@ Public Class Form1
         gewicht_naaf = PI / 4 * dia_naaf ^ 2 * length_naaf * sg_staal
         TextBox93.Text = Round(gewicht_naaf, 1).ToString
 
-        Waaier_as_gewicht = Bodem_gewicht + schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
-        Waaier_gewicht = Bodem_gewicht + schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht      'Gewicht tbv N_krit
+        Waaier_as_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
+        Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht      'Gewicht tbv N_krit
 
 
         '--------max toerental (beide zijden ingeklemd)-----------
@@ -1055,7 +1057,7 @@ Public Class Form1
         maxV = Sqrt(sigma_allowed * Sch_dik * Waaier_dia / (sg_staal * Sch_breed ^ 2 * Cos(Sch_hoek * PI / 180)))
 
         '--------vervangen soortelijk gewicht------------
-        sg_ver_gewicht = sg_staal * (Bodem_gewicht + (Sch_gewicht * aantal_schoep)) / Bodem_gewicht
+        sg_ver_gewicht = sg_staal * (Bodem_gewicht + (Plaat_Sch_gewicht * aantal_schoep)) / Bodem_gewicht
 
         '--------omtrek snelheid------------
         n_actual = NumericUpDown19.Value / 60.0
@@ -1068,44 +1070,12 @@ Public Class Form1
         sigma_schoep = (sg_staal / 2) * V_omtrek ^ 2 * Sch_breed ^ 2 * Cos(Sch_hoek * PI / 180) / (Sch_dik * Waaier_dia / 2)
         sigma_schoep /= 1000 ^ 2   'Trekstekte in N/m2 niet N/mm2
 
-        'MessageBox.Show("sg=" & sg_staal.ToString &" snelh=" & V_omtrek.ToString &" breed=" & Sch_breed.ToString &" dik=" & Sch_dik.ToString &" dia=" & Waaier_dia.ToString &" sigma=" & sigma_schoep.ToString)
-
-        '------------------ Traagheid (0.5 x m x r2)-----------------
-        gem_schoep_dia = (Waaier_dia + Voorplaat_keel) / 2
-        J1 = 0.5 * Bodem_gewicht * (0.5 * Waaier_dia) ^ 2
-        J2 = 0.5 * Voorplaat_gewicht * ((0.5 * Waaier_dia) ^ 2 - (0.5 * Voorplaat_keel) ^ 2)
-        J3 = 0.5 * labyrinth_gewicht * (0.5 * Voorplaat_keel) ^ 2
-        J4 = 0.5 * schoepen_gewicht * (0.5 * gem_schoep_dia) ^ 2
-        J_naaf = 0.5 * gewicht_naaf * (0.5 * dia_naaf) ^ 2                'MassaTraagheid [kg.m2]
-
-        '------------------ J_as (0.5 x m x r2)-----------------
-        Double.TryParse(TextBox41.Text, j_as)
-        'dia_as = NumericUpDown26.Value / 1000
-        'j_as = 0.5 * gewicht_as * (0.5 * dia_as) ^ 2
-
-        '----------- J totaal ---------------------------------
-        If RadioButton5.Checked Then                'Enkelzijdige aanzuiging
-            J_tot = J1 + J2 + J3 + J4 + J_naaf + j_as
-            GroupBox20.Text = "Enkelzijdige waaier afmetingen"
-        Else                                         'Dubbelzijdige aanzuiging
-            J_tot = J1 + (J2 * 2) + J3 + (J4 * 2) + J_naaf + j_as
-            GroupBox20.Text = "Dubbelzijdige waaier afmetingen"
-        End If
-
-
         '------------ Eigen frequenties bodemplaat ---------------------------
         '------------ Roarks, 8 edition, pagina 793 --------------------------
         Back_plate_steel_1 = 10000 * 4.4 * (NumericUpDown17.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
         Back_plate_steel_2 = 10000 * 20.33 * (NumericUpDown17.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
         Back_plate_steel_3 = 10000 * 59.49 * (NumericUpDown17.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
 
-        TextBox209.Text = Round(Back_plate_steel_1, 1).ToString             'Bodemplaat 1ste eigenfrequentie staal [Hz]
-        TextBox210.Text = Round(Back_plate_steel_2, 0).ToString             'Bodemplaat 2de  eigenfrequentie staal [Hz]
-        TextBox204.Text = Round(Back_plate_steel_3, 0).ToString             'Bodemplaat 3de  eigenfrequentie staal [Hz]
-
-        TextBox211.Text = Round(Back_plate_steel_1 * 60, 0).ToString        'Bodemplaat 1st eigenfrequentie staal [rpm]
-        TextBox212.Text = Round(Back_plate_steel_2 * 60, 0).ToString        'Bodemplaat 2de eigenfrequentie staal [rpm]
-        TextBox358.Text = Round(Back_plate_steel_3 * 60, 0).ToString        'Bodemplaat 3de eigenfrequentie staal [rpm]
 
         '------------ Eigen frequenties Voorplaat ---------------------------
         '------------ Roarks, 8 edition, pagina 793 --------------------------
@@ -1113,34 +1083,30 @@ Public Class Form1
         Front_plate_steel_2 = 10000 * 20.33 * (NumericUpDown31.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
         Front_plate_steel_3 = 10000 * 59.49 * (NumericUpDown31.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
 
-        TextBox373.Text = Round(Front_plate_steel_1, 1).ToString             'Frontplaat 1ste eigenfrequentie staal [Hz]
-        TextBox372.Text = Round(Front_plate_steel_2, 0).ToString             'Frontplaat 2de  eigenfrequentie staal [Hz]
-        TextBox360.Text = Round(Front_plate_steel_3, 0).ToString             'Frontplaat 2de  eigenfrequentie staal [Hz]
-
-        TextBox371.Text = Round(Front_plate_steel_1 * 60, 0).ToString        'Frontplaat 1st eigenfrequentie staal [rpm]
-        TextBox370.Text = Round(Front_plate_steel_2 * 60, 0).ToString        'Frontplaat 2de eigenfrequentie staal [rpm]
-        TextBox359.Text = Round(Front_plate_steel_3 * 60, 0).ToString        'Frontplaat 3de eigenfrequentie staal [rpm]
-
-
         '------------------------------------ airfoil------------------------------------
         '--------------------------------------------------------------------------------
         Dim airf_hoog_uitw, airf_skin_plaat_dikte As Double
-        Dim rib_plaat_dikte, rib_afstand As Double
-        Dim airf_weerstandmoment, airf_buiten, airf_binnen, airf_gewicht As Double
+        Dim rib_plaat_dikte, rib_afstand, aantal_ribben As Double
+        Dim airf_weerstandmoment, airf_buiten, airf_binnen, airf_section_gewicht, airf_schoep_gewicht, airf_schoepen_gewicht As Double
         Dim airf_breed_inw, airf_hoog_uitw_inw, airf_force, airf_max_bend, airf_Q_load, airf_sigma_bend As Double
         Dim airf_area, airf_load, airf_tau, airf_hh As Double
 
         airf_hoog_uitw = NumericUpDown2.Value / 1000            '[m] uitwendige maat
         airf_skin_plaat_dikte = NumericUpDown39.Value / 1000    '[m] uitwendige plaat dikte
-        rib_afstand = NumericUpDown40.Value / 1000              '[m] CL-CL ribben = segment breedte
         rib_plaat_dikte = NumericUpDown41.Value / 1000          '[m] rib plaat dikte
+
+        aantal_ribben = NumericUpDown81.Value
+        rib_afstand = Sch_lengte / (aantal_ribben + 1)          '[m] CL-CL ribben = segment breedte
 
         airf_breed_inw = rib_afstand - rib_plaat_dikte          '[m] inwendige maat
         airf_hoog_uitw_inw = airf_hoog_uitw - 2 * airf_skin_plaat_dikte   '[m] inwendige maat
 
-        airf_gewicht = (airf_hoog_uitw * rib_afstand - airf_breed_inw * airf_hoog_uitw_inw) * Sch_breed * sg_staal  'Gewicht [kg]
-        airf_force = airf_gewicht * V_omtrek ^ 2 / (Waaier_dia / 2) * Cos(Sch_hoek * PI / 180)                      'Centrifugal Force [N]  F=m.v^2/r
-        airf_Q_load = airf_force / Sch_breed                                                                        'Centrifugal load [N/m] 
+        airf_section_gewicht = (airf_hoog_uitw * rib_afstand - airf_breed_inw * airf_hoog_uitw_inw) * Sch_breed * sg_staal  'Gewicht 1 box [kg]
+        airf_force = airf_section_gewicht * V_omtrek ^ 2 / (Waaier_dia / 2) * Cos(Sch_hoek * PI / 180)                      'Centrifugal Force [N]  F=m.v^2/r
+        airf_Q_load = airf_force / Sch_breed                                                                                'Centrifugal load [N/m] 
+
+        airf_schoep_gewicht = airf_section_gewicht * (aantal_ribben + 1)    '[kg] gewicht 1 airfoil
+        airf_schoepen_gewicht = airf_schoep_gewicht * aantal_schoep         '[kg] gewicht alle airfoils opgeteld
 
         '---------- weerstandmoment--------------------------
         airf_buiten = 1 / 6 * rib_afstand * airf_hoog_uitw ^ 2              '[m3]
@@ -1159,8 +1125,6 @@ Public Class Form1
 
         '----------------------- airfoil Huber + Hencky ---------------------------------
         airf_hh = Sqrt(airf_sigma_bend ^ 2 + 3 * airf_tau ^ 2)
-
-        TextBox67.Text = Round(airf_hh, 0).ToString                         '[N/mm2]
 
         '----------------------------- airfoil skin -------------------------------------
         '--------------------------------------------------------------------------------
@@ -1187,11 +1151,65 @@ Public Class Form1
         TextBox73.Text = Round(airf_skin_hh, 0).ToString                            '[N/mm2]
 
 
+        '----------------------------------------------------------------------------------------------
+        '------------------------- Traagheid (0.5 x m x r2) -------------------------------------------
+        '----------------------------------------------------------------------------------------------
+        gem_schoep_dia = (Waaier_dia + Voorplaat_keel) / 2
+        J1 = 0.5 * Bodem_gewicht * (0.5 * Waaier_dia) ^ 2
+        J2 = 0.5 * Voorplaat_gewicht * ((0.5 * Waaier_dia) ^ 2 - (0.5 * Voorplaat_keel) ^ 2)
+        J3 = 0.5 * labyrinth_gewicht * (0.5 * Voorplaat_keel) ^ 2
+        J4 = 0.5 * Plaat_schoepen_gewicht * (0.5 * gem_schoep_dia) ^ 2
+        J5 = 0.5 * airf_schoepen_gewicht * (0.5 * gem_schoep_dia) ^ 2
+        J_naaf = 0.5 * gewicht_naaf * (0.5 * dia_naaf) ^ 2                'MassaTraagheid [kg.m2]
+
+        '------------------ J_as (0.5 x m x r2)-----------------
+        Double.TryParse(TextBox41.Text, j_as)
+
+
+        '----------- J totaal ---------------------------------
+        If RadioButton5.Checked Then                'Enkelzijdige aanzuiging
+            GroupBox20.Text = "Enkelzijdige waaier afmetingen"
+            If RadioButton37.Checked Then   'Plaat schoep
+                J_tot = J1 + J2 + J3 + J4 + J_naaf + j_as
+            Else                            'Air foil
+                J_tot = J1 + J2 + J3 + J5 + J_naaf + j_as
+            End If
+        Else                                         'Dubbelzijdige aanzuiging
+            GroupBox20.Text = "Dubbelzijdige waaier afmetingen"
+            If RadioButton37.Checked Then   'Plaat schoep
+                J_tot = J1 + (J2 * 2) + J3 + (J4 * 2) + J_naaf + j_as
+            Else
+                J_tot = J1 + (J2 * 2) + J3 + (J5 * 2) + J_naaf + j_as
+            End If
+        End If
+
         '--------Present data------------
+
+        TextBox209.Text = Round(Back_plate_steel_1, 1).ToString             'Bodemplaat 1ste eigenfrequentie staal [Hz]
+        TextBox210.Text = Round(Back_plate_steel_2, 0).ToString             'Bodemplaat 2de  eigenfrequentie staal [Hz]
+        TextBox204.Text = Round(Back_plate_steel_3, 0).ToString             'Bodemplaat 3de  eigenfrequentie staal [Hz]
+
+        TextBox211.Text = Round(Back_plate_steel_1 * 60, 0).ToString        'Bodemplaat 1st eigenfrequentie staal [rpm]
+        TextBox212.Text = Round(Back_plate_steel_2 * 60, 0).ToString        'Bodemplaat 2de eigenfrequentie staal [rpm]
+        TextBox358.Text = Round(Back_plate_steel_3 * 60, 0).ToString        'Bodemplaat 3de eigenfrequentie staal [rpm]
+
+        TextBox373.Text = Round(Front_plate_steel_1, 1).ToString            'Frontplaat 1ste eigenfrequentie staal [Hz]
+        TextBox372.Text = Round(Front_plate_steel_2, 0).ToString            'Frontplaat 2de  eigenfrequentie staal [Hz]
+        TextBox360.Text = Round(Front_plate_steel_3, 0).ToString            'Frontplaat 2de  eigenfrequentie staal [Hz]
+
+        TextBox371.Text = Round(Front_plate_steel_1 * 60, 0).ToString       'Frontplaat 1st eigenfrequentie staal [rpm]
+        TextBox370.Text = Round(Front_plate_steel_2 * 60, 0).ToString       'Frontplaat 2de eigenfrequentie staal [rpm]
+        TextBox359.Text = Round(Front_plate_steel_3 * 60, 0).ToString       'Frontplaat 3de eigenfrequentie staal [rpm]
+
+        TextBox67.Text = Round(airf_hh, 0).ToString                         '[N/mm2]
+        TextBox383.Text = Round(rib_afstand * 1000, 0).ToString             '[mm] rib afstand
+        TextBox382.Text = Round(airf_schoep_gewicht, 1).ToString            '[kg] 1 airfoil
+        TextBox384.Text = Round(airf_schoepen_gewicht, 1).ToString          '[kg] alle airfoils opgeteld
+
         TextBox32.Text = Round(sigma_bodemplaat, 0).ToString
         TextBox36.Text = Round(Sch_breed * 1000, 1).ToString                'Breedte schoep
         TextBox37.Text = Round(Sch_hoek, 1).ToString                        'Uittrede hoek in graden
-        TextBox42.Text = Round(Sch_gewicht, 1).ToString
+        TextBox42.Text = Round(Plaat_Sch_gewicht, 1).ToString
         TextBox49.Text = Round(maxV, 0).ToString
         TextBox50.Text = Round(aantal_schoep, 0).ToString
         TextBox51.Text = Round(V_omtrek, 0).ToString
@@ -1203,7 +1221,7 @@ Public Class Form1
 
         TextBox374.Text = Round(Waaier_gewicht, 1).ToString
 
-        TextBox95.Text = Round(schoepen_gewicht, 1).ToString
+        TextBox95.Text = Round(Plaat_schoepen_gewicht, 1).ToString
         TextBox192.Text = Round(Waaier_as_gewicht, 0).ToString
         TextBox96.Text = Round(Waaier_as_gewicht, 1).ToString
         TextBox103.Text = Round(Voorplaat_keel * 1000, 0).ToString
@@ -1212,7 +1230,11 @@ Public Class Form1
         TextBox105.Text = Round(J1, 1).ToString
         TextBox106.Text = Round(J2, 1).ToString
         TextBox107.Text = Round(J3, 1).ToString
-        TextBox108.Text = Round(J4, 1).ToString
+        If RadioButton37.Checked Then                   'Plaatschroef
+            TextBox108.Text = Round(J4, 1).ToString
+        Else                                            'Air foil
+            TextBox108.Text = Round(J5, 1).ToString
+        End If
         TextBox92.Text = Round(J_naaf, 2).ToString          'Massa traagheid (0.5*M*R^2)
         TextBox109.Text = Round(J_tot, 1).ToString          'Massa traagheid Totaal
         NumericUpDown45.Value = Round(J_tot, 1).ToString
@@ -4149,7 +4171,7 @@ Public Class Form1
         oTable.Cell(34, 3).Range.Text = "[mm]"
 
         oTable.Cell(35, 1).Range.Text = "~ Rib afstand cl-cl"
-        oTable.Cell(35, 2).Range.Text = NumericUpDown40.Value
+        oTable.Cell(35, 2).Range.Text = TextBox383.Text
         oTable.Cell(35, 3).Range.Text = "[mm]"
 
         oTable.Cell(36, 1).Range.Text = "~ Rib plaatdikte"
