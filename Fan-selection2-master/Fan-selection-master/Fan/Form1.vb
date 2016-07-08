@@ -94,6 +94,7 @@ Public Class Form1
     Public PZ(12) As PPOINT                 'Raw data, Polynomial regression
     Public BZ(5, 5) As Double               'Poly Coefficients, Polynomial regression
 
+    Public dp_static_inletbox_VC As Double  'Required Static Fan Pressure incl inlet box and Vane Control
     '-------------------------------------------------
     'The results of the polynoom calculation are stored in case 0
     'if a case is stored then the data is transferred to case 1...8
@@ -518,13 +519,13 @@ Public Class Form1
         Label1.Text = ""
         If RadioButton6.Checked Then Label1.Text = "2"      'Double suction
 
-        If NumericUpDown37.Value <= 10 Then
+        If dp_static_inletbox_VC <= 10 Then
             Label1.Text += "LD "                             'Low pressure
         Else
-            If NumericUpDown37.Value > 10 And NumericUpDown37.Value <= 40 Then
+            If dp_static_inletbox_VC > 10 And dp_static_inletbox_VC <= 40 Then
                 Label1.Text += "MD "                         'Medium pressure
             Else
-                If NumericUpDown37.Value > 40 Then
+                If dp_static_inletbox_VC > 40 Then
                     Label1.Text += "HD "                     'High pressure
                 End If
             End If
@@ -646,7 +647,7 @@ Public Class Form1
                 TextBox124.Text = Round(T_spec_labour, 0).ToString          'Spez. Arbeid [j/Kg]
 
                 '--------------------------- gewenste gegevens------------------------------------------
-                G_Pstat_Pa = NumericUpDown37.Value * 100    'Gewenst Pressure totaal [mbar]->[Pa]
+                G_Pstat_Pa = dp_static_inletbox_VC * 100    'Gewenst Pressure totaal [mbar]->[Pa]
                 G_air_temp = NumericUpDown4.Value           'Gewenste arbeids temperatuur in [c]
 
                 '------------ Gas mol Weight vochtigheid ---------------
@@ -987,10 +988,8 @@ Public Class Form1
         Dim Voorplaat_dik As Double
         Dim Voorplaat_gewicht As Double
         Dim sg_ver_gewicht As Double    'sg vervangend gewicht
-        Dim sigma_schoep As Double
-        Dim sigma_bodemplaat As Double
-        Dim V_omtrek As Double
-        Dim n_actual As Double
+        Dim sigma_schoep, sigma_bodemplaat As Double
+        Dim V_omtrek, n_actual As Double
         Dim Voorplaat_keel, inw_schoep_dia, gem_schoep_dia As Double
         Dim J1, J2, J3, J4, J5, J_naaf, J_tot, j_as As Double
         Dim dia_naaf, gewicht_naaf, gewicht_as As Double
@@ -999,6 +998,13 @@ Public Class Form1
         Dim n_krit, Waaier_gewicht As Double
         Dim Back_plate_steel_1, Back_plate_steel_2, Back_plate_steel_3 As Double
         Dim Front_plate_steel_1, Front_plate_steel_2, Front_plate_steel_3 As Double
+        Dim airf_hoog_uitw, airf_skin_plaat_dikte As Double
+        Dim rib_plaat_dikte, rib_afstand, aantal_ribben As Double
+        Dim airf_weerstandmoment, airf_buiten, airf_binnen, airf_section_gewicht, airf_schoep_gewicht, airf_schoepen_gewicht As Double
+        Dim airf_breed_inw, airf_hoog_uitw_inw, airf_force, airf_max_bend, airf_Q_load, airf_sigma_bend As Double
+        Dim airf_area, airf_load, airf_tau, airf_hh As Double
+        Dim airf_skin_weerstan, airf_skin_gewicht, airf_skin_force, airf_skin_Q_load As Double
+        Dim airf_skin_max_bend, airf_skin_sigma_bend, airf_skin_area, airf_skin_load, airf_skin_tau, airf_skin_hh As Double
 
         If Sch_hoek > 90 Then TextBox37.Text = "90"
 
@@ -1085,12 +1091,6 @@ Public Class Form1
 
         '------------------------------------ airfoil------------------------------------
         '--------------------------------------------------------------------------------
-        Dim airf_hoog_uitw, airf_skin_plaat_dikte As Double
-        Dim rib_plaat_dikte, rib_afstand, aantal_ribben As Double
-        Dim airf_weerstandmoment, airf_buiten, airf_binnen, airf_section_gewicht, airf_schoep_gewicht, airf_schoepen_gewicht As Double
-        Dim airf_breed_inw, airf_hoog_uitw_inw, airf_force, airf_max_bend, airf_Q_load, airf_sigma_bend As Double
-        Dim airf_area, airf_load, airf_tau, airf_hh As Double
-
         airf_hoog_uitw = NumericUpDown2.Value / 1000            '[m] uitwendige maat
         airf_skin_plaat_dikte = NumericUpDown39.Value / 1000    '[m] uitwendige plaat dikte
         rib_plaat_dikte = NumericUpDown41.Value / 1000          '[m] rib plaat dikte
@@ -1128,9 +1128,6 @@ Public Class Form1
 
         '----------------------------- airfoil skin -------------------------------------
         '--------------------------------------------------------------------------------
-        Dim airf_skin_weerstan, airf_skin_gewicht, airf_skin_force, airf_skin_Q_load As Double
-        Dim airf_skin_max_bend, airf_skin_sigma_bend, airf_skin_area, airf_skin_load, airf_skin_tau, airf_skin_hh As Double
-
         airf_skin_weerstan = 1 / 6 * rib_afstand * airf_skin_plaat_dikte ^ 2                                '[m3] weerstandmoment
         airf_skin_gewicht = rib_afstand * airf_skin_plaat_dikte * Sch_breed * sg_staal                      '[kg]
         airf_skin_force = airf_skin_gewicht * V_omtrek ^ 2 / (Waaier_dia / 2) * Cos(Sch_hoek * PI / 180)    '[N]
@@ -1230,9 +1227,12 @@ Public Class Form1
         TextBox105.Text = Round(J1, 1).ToString
         TextBox106.Text = Round(J2, 1).ToString
         TextBox107.Text = Round(J3, 1).ToString
-        If RadioButton37.Checked Then                   'Plaatschroef
+        TextBox387.Text = Round(J4, 1).ToString
+        TextBox386.Text = Round(J5, 1).ToString
+
+        If RadioButton37.Checked Then                       'Plaat schroep
             TextBox108.Text = Round(J4, 1).ToString
-        Else                                            'Air foil
+        Else                                                'Air foil
             TextBox108.Text = Round(J5, 1).ToString
         End If
         TextBox92.Text = Round(J_naaf, 2).ToString          'Massa traagheid (0.5*M*R^2)
@@ -1742,7 +1742,7 @@ Public Class Form1
 
                 '---------------- fan target info---------------------
                 TextBox149.Text = Round(G_Debiet_z_act_hr, 0).ToString  'Debiet [Am3/hr]
-                TextBox148.Text = NumericUpDown37.Value.ToString        'Pstatic [mbar]
+                TextBox148.Text = dp_static_inletbox_VC.ToString        'Pstatic [mbar]
                 TextBox156.Text = NumericUpDown12.Value.ToString        'Density [kg/m3]
 
                 Chart1.ChartAreas("ChartArea0").AxisY.Title = "Ptotaal [mBar]"
@@ -1766,11 +1766,11 @@ Public Class Form1
                 '------------------ Grafiek tekst en target ---------------------
                 If CheckBox2.Checked Then               '========Per uur=========
                     Q_target = G_Debiet_z_act_hr                                            '[Am3/hr]
-                    P_target = NumericUpDown37.Value                                        '[mBar] Gewenste fan  gegevens
+                    P_target = dp_static_inletbox_VC                                        '[mBar] Gewenste fan  gegevens
                     Chart1.ChartAreas("ChartArea0").AxisX.Title = "Debiet [Am3/hr]"
                 Else                                    '========Per seconde=========
                     Q_target = G_Debiet_z_act_hr / 3600                                     '[Am3/sec]
-                    P_target = NumericUpDown37.Value                                        '[mBar] Gewenste fan  gegevens
+                    P_target = dp_static_inletbox_VC                                        '[mBar] Gewenste fan  gegevens
                     Chart1.ChartAreas("ChartArea0").AxisX.Title = "Debiet [Am3/sec]"
                 End If
 
@@ -1967,6 +1967,7 @@ Public Class Form1
         Dim oDoc As Word.Document
         Dim oTable As Word.Table
         Dim oPara1, oPara2, oPara4 As Word.Paragraph
+        Dim j As Integer
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
@@ -2016,7 +2017,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a 20 x 10 table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 23, 10)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 25, 10)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
@@ -2034,6 +2035,9 @@ Public Class Form1
             oTable.Cell(j + 1, 9).Range.Text = case_x_conditions(j, 7)      'Case 5
             oTable.Cell(j + 1, 10).Range.Text = case_x_conditions(j, 8)     'Case 6
         Next
+        If CheckBox1.Checked Then oTable.Cell(23, 1).Range.Text = "Inlet box included"
+        If CheckBox15.Checked Then oTable.Cell(24, 1).Range.Text = "VC included"
+
 
         oTable.Columns.Item(1).Width = oWord.InchesToPoints(1.3)   'Change width of columns 
         oTable.Columns.Item(2).Width = oWord.InchesToPoints(0.8)
@@ -2638,7 +2642,9 @@ Public Class Form1
         Dim F_axial As Double
         Dim dia_pulley, S_power, F_snaar, F_scheef As Double
         Dim Waaier_dia, Voorplaat_keel As Double
+        Dim dp_stat_tbox_VC As Double                       'dp fan including inletbox and Vane Control
 
+        Double.TryParse(TextBox385.Text, dp_stat_tbox_VC)
         W_rpm = NumericUpDown19.Value                       'Toerental waaier
         TextBox110.Text = NumericUpDown19.Value.ToString
 
@@ -2734,7 +2740,7 @@ Public Class Form1
         If ComboBox1.SelectedIndex > -1 Then '------- schoepgewicht berekenen-----------
             Waaier_dia = NumericUpDown21.Value / 1000 '[m]
             Voorplaat_keel = Tschets(ComboBox1.SelectedIndex).Tdata(16) / 1000 * (Waaier_dia / 1.0)     '[m]
-            F_axial = PI / 4 * Voorplaat_keel ^ 2 * NumericUpDown37.Value * 100
+            F_axial = PI / 4 * Voorplaat_keel ^ 2 * dp_static_inletbox_VC * 100
         End If
         ' MessageBox.Show("Voorplaat_keel=" & Voorplaat_keel.ToString &"  F_b_hor =" & F_b_hor.ToString)
 
@@ -2769,12 +2775,18 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown37.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged
         Update_selectie()
     End Sub
     Private Sub Update_selectie()
+
+        dp_static_inletbox_VC = NumericUpDown37.Value               'Required dp static pressure
+        If CheckBox1.Checked Then dp_static_inletbox_VC += 2.5      'Inlet box pressure loss compensated
+        If CheckBox15.Checked Then dp_static_inletbox_VC += 2.5     'Vane Control pressure loss compensated
+        TextBox385.Text = dp_static_inletbox_VC.ToString
+
         NumericUpDown9.Value = NumericUpDown33.Value
-        NumericUpDown21.Value = NumericUpDown33.Value       'Diameter waaier spanning berekening
+        NumericUpDown21.Value = NumericUpDown33.Value               'Diameter waaier spanning berekening
         NumericUpDown10.Value = NumericUpDown13.Value
         If TabControl1.SelectedTab.Name = "TabPage1" Then
             ComboBox7.SelectedIndex = ComboBox1.SelectedIndex       'type selectie
@@ -2867,7 +2879,7 @@ Public Class Form1
 
             Label152.Text = "Waaier type " & Label1.Text
             Double.TryParse(TextBox159.Text, dia_fan_inlet)                 'Diameter suction
-            p_stat = NumericUpDown37.Value * 100                            '[mBar]->[Pa] static 
+            p_stat = dp_static_inletbox_VC * 100                            '[mBar]->[Pa] static 
             Double.TryParse(TextBox273.Text, P_tot)                         '[mBar]
             P_tot *= 100                                                    '[mBar]->[Pa]
             Double.TryParse(TextBox22.Text, Act_flow_sec_noise)             '[m3/hr]
