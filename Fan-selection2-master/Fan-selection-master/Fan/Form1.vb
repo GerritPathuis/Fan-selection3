@@ -1035,6 +1035,27 @@ Public Class Form1
             Plaat_Sch_gewicht = Sch_lengte * Sch_breed * Sch_dik * sg_staal             'Plaat schoepen
             Plaat_schoepen_gewicht = aantal_schoep * Plaat_Sch_gewicht                  'Plaat schoepen
 
+            '--------omtrek snelheid------------
+            n_actual = NumericUpDown19.Value / 60.0
+            V_omtrek = Waaier_dia * PI * n_actual
+
+            '---------------- airfoil ---------------
+            airf_hoog_uitw = NumericUpDown2.Value / 1000            '[m] uitwendige maat
+            airf_skin_plaat_dikte = NumericUpDown39.Value / 1000    '[m] uitwendige plaat dikte
+            rib_plaat_dikte = NumericUpDown41.Value / 1000          '[m] rib plaat dikte
+
+            aantal_ribben = NumericUpDown81.Value
+            rib_afstand = Sch_lengte / (aantal_ribben + 1)          '[m] CL-CL ribben = segment breedte
+
+            airf_breed_inw = rib_afstand - rib_plaat_dikte          '[m] inwendige maat
+            airf_hoog_uitw_inw = airf_hoog_uitw - 2 * airf_skin_plaat_dikte   '[m] inwendige maat
+
+            airf_section_gewicht = (airf_hoog_uitw * rib_afstand - airf_breed_inw * airf_hoog_uitw_inw) * Sch_breed * sg_staal  'Gewicht 1 box [kg]
+            airf_force = airf_section_gewicht * V_omtrek ^ 2 / (Waaier_dia / 2) * Cos(Sch_hoek * PI / 180)                      'Centrifugal Force [N]  F=m.v^2/r
+            airf_Q_load = airf_force / Sch_breed                                                                                'Centrifugal load [N/m] 
+
+            airf_schoep_gewicht = airf_section_gewicht * (aantal_ribben + 1)    '[kg] gewicht 1 airfoil
+            airf_schoepen_gewicht = airf_schoep_gewicht * aantal_schoep         '[kg] gewicht alle airfoils opgeteld
         End If
 
         Bodem_gewicht = PI / 4 * Waaier_dia ^ 2 * Waaier_dik * sg_staal                                 'Bodem gewicht
@@ -1052,8 +1073,22 @@ Public Class Form1
         gewicht_naaf = PI / 4 * dia_naaf ^ 2 * length_naaf * sg_staal
         TextBox93.Text = Round(gewicht_naaf, 1).ToString
 
-        Waaier_as_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
-        Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht      'Gewicht tbv N_krit
+        '-------------- waaier en waaier-as gewicht------------------------------
+        If RadioButton37.Checked Then   'Plaat schoepen
+            Waaier_as_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
+            Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_naaf + las_gewicht    'Gewicht tbv N_krit
+            If RadioButton6.Checked Then                'Dubbelzijdige aanzuiging
+                Waaier_as_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
+                Waaier_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
+            End If
+        Else                            'Airfoil schoepen
+            Waaier_as_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
+            Waaier_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_naaf + las_gewicht     'Gewicht tbv N_krit
+            If RadioButton6.Checked Then                'Dubbelzijdige aanzuiging
+                Waaier_as_gewicht += airf_schoepen_gewicht + Voorplaat_gewicht
+                Waaier_gewicht += airf_schoepen_gewicht + Voorplaat_gewicht
+            End If
+        End If
 
 
         '--------max toerental (beide zijden ingeklemd)-----------
@@ -1065,9 +1100,6 @@ Public Class Form1
         '--------vervangen soortelijk gewicht------------
         sg_ver_gewicht = sg_staal * (Bodem_gewicht + (Plaat_Sch_gewicht * aantal_schoep)) / Bodem_gewicht
 
-        '--------omtrek snelheid------------
-        n_actual = NumericUpDown19.Value / 60.0
-        V_omtrek = Waaier_dia * PI * n_actual
 
         '--------- spanning- bodemplaat formule (6.10) page 193------------
         sigma_bodemplaat = 0.83 * sg_ver_gewicht * V_omtrek ^ 2 / 1000 ^ 2 'Trekstekte in N/m2 niet N/mm2
@@ -1090,24 +1122,6 @@ Public Class Form1
         Front_plate_steel_3 = 10000 * 59.49 * (NumericUpDown31.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
 
         '------------------------------------ airfoil------------------------------------
-        '--------------------------------------------------------------------------------
-        airf_hoog_uitw = NumericUpDown2.Value / 1000            '[m] uitwendige maat
-        airf_skin_plaat_dikte = NumericUpDown39.Value / 1000    '[m] uitwendige plaat dikte
-        rib_plaat_dikte = NumericUpDown41.Value / 1000          '[m] rib plaat dikte
-
-        aantal_ribben = NumericUpDown81.Value
-        rib_afstand = Sch_lengte / (aantal_ribben + 1)          '[m] CL-CL ribben = segment breedte
-
-        airf_breed_inw = rib_afstand - rib_plaat_dikte          '[m] inwendige maat
-        airf_hoog_uitw_inw = airf_hoog_uitw - 2 * airf_skin_plaat_dikte   '[m] inwendige maat
-
-        airf_section_gewicht = (airf_hoog_uitw * rib_afstand - airf_breed_inw * airf_hoog_uitw_inw) * Sch_breed * sg_staal  'Gewicht 1 box [kg]
-        airf_force = airf_section_gewicht * V_omtrek ^ 2 / (Waaier_dia / 2) * Cos(Sch_hoek * PI / 180)                      'Centrifugal Force [N]  F=m.v^2/r
-        airf_Q_load = airf_force / Sch_breed                                                                                'Centrifugal load [N/m] 
-
-        airf_schoep_gewicht = airf_section_gewicht * (aantal_ribben + 1)    '[kg] gewicht 1 airfoil
-        airf_schoepen_gewicht = airf_schoep_gewicht * aantal_schoep         '[kg] gewicht alle airfoils opgeteld
-
         '---------- weerstandmoment--------------------------
         airf_buiten = 1 / 6 * rib_afstand * airf_hoog_uitw ^ 2              '[m3]
         airf_binnen = 1 / 6 * airf_breed_inw * airf_hoog_uitw_inw ^ 2       '[m3]
@@ -1181,7 +1195,6 @@ Public Class Form1
         End If
 
         '--------Present data------------
-
         TextBox209.Text = Round(Back_plate_steel_1, 1).ToString             'Bodemplaat 1ste eigenfrequentie staal [Hz]
         TextBox210.Text = Round(Back_plate_steel_2, 0).ToString             'Bodemplaat 2de  eigenfrequentie staal [Hz]
         TextBox204.Text = Round(Back_plate_steel_3, 0).ToString             'Bodemplaat 3de  eigenfrequentie staal [Hz]
@@ -1216,9 +1229,7 @@ Public Class Form1
         TextBox45.Text = Round(Bodem_gewicht, 1).ToString
         TextBox94.Text = Round(Voorplaat_gewicht, 1).ToString
 
-        TextBox374.Text = Round(Waaier_gewicht, 1).ToString
 
-        TextBox95.Text = Round(Plaat_schoepen_gewicht, 1).ToString
         TextBox192.Text = Round(Waaier_as_gewicht, 0).ToString
         TextBox96.Text = Round(Waaier_as_gewicht, 1).ToString
         TextBox103.Text = Round(Voorplaat_keel * 1000, 0).ToString
@@ -1229,12 +1240,17 @@ Public Class Form1
         TextBox107.Text = Round(J3, 1).ToString
         TextBox387.Text = Round(J4, 1).ToString
         TextBox386.Text = Round(J5, 1).ToString
+        TextBox374.Text = Round(Waaier_gewicht, 1).ToString
 
         If RadioButton37.Checked Then                       'Plaat schroep
+
+            TextBox95.Text = Round(Plaat_schoepen_gewicht, 1).ToString
             TextBox108.Text = Round(J4, 1).ToString
         Else                                                'Air foil
+            TextBox95.Text = Round(airf_schoepen_gewicht, 1).ToString
             TextBox108.Text = Round(J5, 1).ToString
         End If
+
         TextBox92.Text = Round(J_naaf, 2).ToString          'Massa traagheid (0.5*M*R^2)
         TextBox109.Text = Round(J_tot, 1).ToString          'Massa traagheid Totaal
         NumericUpDown45.Value = Round(J_tot, 1).ToString
