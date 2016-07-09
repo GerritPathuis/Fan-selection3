@@ -775,9 +775,6 @@ Public Class Form1
                 Dim dia_zuig As Double
                 Dim i As Integer
 
-
-
-
                 flow = G_Debiet_z_act_sec
                 star_flow = Round(flow * 3600, 0)
                 star_Psta = (ABCDE_Psta(0) + ABCDE_Psta(1) * flow ^ 1 + ABCDE_Psta(2) * flow ^ 2 + ABCDE_Psta(3) * flow ^ 3 + ABCDE_Psta(4) * flow ^ 4 + ABCDE_Psta(5) * flow ^ 5).ToString
@@ -844,9 +841,25 @@ Public Class Form1
                     End If
                 Next
 
-
                 Calc_stage(cond(1))                                 'Bereken de waaier #1  
-                calc_loop_loss(cond(1))                             'Bereken de omloop verliezen  
+                calc_loop_loss(cond(1))                             'Bereken de omloop verliezen 
+
+                '-------------------------- calc pressure loss over inlet box and VC--------------------
+                Dim dp_inlet_box, dp_inlet_VC_demper As Double
+
+                If CheckBox1.Checked Then
+                    dp_inlet_box = 1.0 * 0.5 * cond(1).Ro1 * cond(1).in_velos ^ 2         '[Pa]
+                Else
+                    dp_inlet_box = 0
+                End If
+
+                If CheckBox15.Checked Then
+                    dp_inlet_VC_demper = 1.0 * 0.5 * cond(1).Ro1 * cond(1).in_velos ^ 2   '[Pa]
+                Else
+                    dp_inlet_VC_demper = 0
+                End If
+                TextBox391.Text = Round(dp_inlet_box / 100, 1).ToString         'Inlet box pressure loss [mbar]
+                TextBox390.Text = Round(dp_inlet_VC_demper / 100, 1).ToString   'VC inlet demper pressure loss [mbar]
 
                 '-------------------------- Waaier #2 ----------------------
                 cond(2) = cond(1)                                   'Kopieer de struct met gegevens
@@ -1828,19 +1841,21 @@ Public Class Form1
 
                 '-------------------Inlet Vane Control lines ---------------------
                 If CheckBox13.Checked Then
-                    Dim VC_phi = New Double() {0.02, 0.04, 0.06, 0.08, 0.1, 0.12}     'Pressure loss coeff (*= 2.5)
+                    Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18}     'Pressure loss coeff (*= 2.5)
                     Dim VC_open = New String() {"80", "70", "60", "50", "40", "30"}
                     Dim point_count As Integer
                     For jj = 0 To 5
                         For hh = 0 To 50
                             debiet = case_x_flow(hh, 0)
-                            If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)      'Per uur
-                            P_loss_IVC(jj + 10, VC_phi(jj), hh, debiet, VC_open(jj))         'Calc and plot to chart
+                            If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)          'Per uur
+                            P_loss_IVC(jj + 10, VC_phi(jj), hh, debiet, VC_open(jj))            'Calc and plot to chart
                         Next
-                        point_count = Chart1.Series(jj + 10).Points.Count - 1                'Last plotted point
-                        Chart1.Series(jj + 10).Points(point_count).Label = VC_open(jj) & "°" 'Add the VC opening angle 
+                        point_count = Chart1.Series(jj + 10).Points.Count - 1                   'Last plotted point
+                        Chart1.Series(jj + 10).Points(point_count).Label = VC_open(jj) & "° "   'Add the VC opening angle 
                     Next
+                    Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only"             'Add Remark 
                 End If
+
 
                 '---------------Outlet damper-----------------
                 If CheckBox14.Checked Then
@@ -2051,9 +2066,6 @@ Public Class Form1
             oTable.Cell(j + 1, 9).Range.Text = case_x_conditions(j, 7)      'Case 5
             oTable.Cell(j + 1, 10).Range.Text = case_x_conditions(j, 8)     'Case 6
         Next
-        If CheckBox1.Checked Then oTable.Cell(23, 1).Range.Text = "Inlet box included"
-        If CheckBox15.Checked Then oTable.Cell(24, 1).Range.Text = "VC included"
-
 
         oTable.Columns.Item(1).Width = oWord.InchesToPoints(1.3)   'Change width of columns 
         oTable.Columns.Item(2).Width = oWord.InchesToPoints(0.8)
@@ -2791,14 +2803,25 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged, NumericUpDown85.ValueChanged, NumericUpDown40.ValueChanged
         Update_selectie()
     End Sub
     Private Sub Update_selectie()
 
         dp_static_inletbox_VC = NumericUpDown37.Value               'Required dp static pressure
-        If CheckBox1.Checked Then dp_static_inletbox_VC += 2.5      'Inlet box pressure loss compensated
-        If CheckBox15.Checked Then dp_static_inletbox_VC += 2.5     'Vane Control pressure loss compensated
+        If CheckBox1.Checked Then
+            dp_static_inletbox_VC += NumericUpDown40.Value          'Inlet box pressure loss compensated
+            TextBox388.Text = NumericUpDown40.Value.ToString
+        Else
+            TextBox388.Text = "0.0"
+        End If
+
+        If CheckBox15.Checked Then
+            dp_static_inletbox_VC += NumericUpDown85.Value          'Vane Control pressure loss compensated
+            TextBox389.Text = NumericUpDown85.Value.ToString
+        Else
+            TextBox389.Text = "0.0"
+        End If
         TextBox385.Text = dp_static_inletbox_VC.ToString
 
         NumericUpDown9.Value = NumericUpDown33.Value
@@ -3918,6 +3941,8 @@ Public Class Form1
         case_x_conditions(19, 10) = "Shaft power"
         case_x_conditions(20, 10) = "Efficiency"
         case_x_conditions(21, 10) = "Mol weight "
+        case_x_conditions(22, 10) = "dp Inlet box"
+        case_x_conditions(23, 10) = "dp Inlet VC-damper"
 
         '----------- Units------------------
         case_x_conditions(0, 11) = " "
@@ -3948,6 +3973,8 @@ Public Class Form1
         case_x_conditions(19, 11) = "[kW]"
         case_x_conditions(20, 11) = "[%]"
         case_x_conditions(21, 11) = "[g/mol]"
+        case_x_conditions(22, 11) = "[mbar]"
+        case_x_conditions(23, 11) = "[mbar]"
 
         '----------- general data------------------
         case_x_conditions(0, NumericUpDown72.Value) = TextBox89.Text                                'Case name 
@@ -3963,7 +3990,7 @@ Public Class Form1
         case_x_conditions(8, NumericUpDown72.Value) = TextBox269.Text                   'Flow [Nm3/hr]
         case_x_conditions(9, NumericUpDown72.Value) = NumericUpDown4.Value.ToString     'Temp [c]
         case_x_conditions(10, NumericUpDown72.Value) = NumericUpDown76.Value.ToString    'Pressure [mbar abs]
-        case_x_conditions(11, NumericUpDown72.Value) = NumericUpDown12.Value.ToString 'Density [kg/Am3]
+        case_x_conditions(11, NumericUpDown72.Value) = NumericUpDown12.Value.ToString   'Density [kg/Am3]
 
         '----------- outlet data--------------------
         case_x_conditions(12, NumericUpDown72.Value) = TextBox267.Text                  'Volume Flow [Am3/hr]
@@ -3982,6 +4009,18 @@ Public Class Form1
         Else
             case_x_conditions(21, NumericUpDown72.Value) = "n.a."
         End If
+        If CheckBox1.Checked Then
+            case_x_conditions(22, NumericUpDown72.Value) = TextBox391.Text              'Inlet box [mBar]
+        Else
+            case_x_conditions(22, NumericUpDown72.Value) = "n.a."
+        End If
+
+        If CheckBox15.Checked Then
+            case_x_conditions(23, NumericUpDown72.Value) = TextBox390.Text              'Inlet VC-damper [mbar]
+        Else
+            case_x_conditions(23, NumericUpDown72.Value) = "n.a."
+        End If
+
 
 
         Button11_Click(sender, New System.EventArgs())  'Draw chart1 (calculate the data points before storage)
