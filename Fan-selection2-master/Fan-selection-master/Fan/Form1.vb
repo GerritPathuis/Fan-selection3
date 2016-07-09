@@ -848,13 +848,13 @@ Public Class Form1
                 Dim dp_inlet_box, dp_inlet_VC_demper As Double
 
                 If CheckBox1.Checked Then
-                    dp_inlet_box = 1.0 * 0.5 * cond(1).Ro1 * cond(1).in_velos ^ 2         '[Pa]
+                    dp_inlet_box = 1.2 * (0.5 * cond(1).Ro1 * cond(1).in_velos ^ 2)        '[Pa] inlet box
                 Else
                     dp_inlet_box = 0
                 End If
 
                 If CheckBox15.Checked Then
-                    dp_inlet_VC_demper = 1.0 * 0.5 * cond(1).Ro1 * cond(1).in_velos ^ 2   '[Pa]
+                    dp_inlet_VC_demper = 0.5 * (0.5 * cond(1).Ro1 * cond(1).in_velos ^ 2)   '[Pa] Inlet Vane Control
                 Else
                     dp_inlet_VC_demper = 0
                 End If
@@ -2805,7 +2805,7 @@ Public Class Form1
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged
         Update_selectie()
-        If CheckBox1.Checked Or CheckBox15.Checked Then Update_selectie()
+        If CheckBox1.Checked Or CheckBox15.Checked Then Update_selectie()   'Required for pressure loss inlet box and IVC
     End Sub
     Private Sub Update_selectie()
 
