@@ -2803,22 +2803,23 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged, NumericUpDown85.ValueChanged, NumericUpDown40.ValueChanged
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged
         Update_selectie()
+        If CheckBox1.Checked Or CheckBox15.Checked Then Update_selectie()
     End Sub
     Private Sub Update_selectie()
 
         dp_static_inletbox_VC = NumericUpDown37.Value               'Required dp static pressure
         If CheckBox1.Checked Then
-            dp_static_inletbox_VC += NumericUpDown40.Value          'Inlet box pressure loss compensated
-            TextBox388.Text = NumericUpDown40.Value.ToString
+            dp_static_inletbox_VC += Convert.ToDouble(TextBox391.Text) 'Inlet box pressure loss compensate
+            TextBox388.Text = TextBox391.Text
         Else
             TextBox388.Text = "0.0"
         End If
 
         If CheckBox15.Checked Then
-            dp_static_inletbox_VC += NumericUpDown85.Value          'Vane Control pressure loss compensated
-            TextBox389.Text = NumericUpDown85.Value.ToString
+            dp_static_inletbox_VC += Convert.ToDouble(TextBox390.Text)          'Vane Control pressure loss compensated
+            TextBox389.Text = TextBox390.Text
         Else
             TextBox389.Text = "0.0"
         End If
@@ -3935,9 +3936,9 @@ Public Class Form1
         case_x_conditions(15, 10) = "Discharge Density"
 
         '----------- performance-------------------
-        case_x_conditions(16, 10) = "dP Static"
-        case_x_conditions(17, 10) = "dP Dynamic"
-        case_x_conditions(18, 10) = "dP Total"
+        case_x_conditions(16, 10) = "dP Fan Static"
+        case_x_conditions(17, 10) = "dP Fan Dynamic"
+        case_x_conditions(18, 10) = "dP Fan Total"
         case_x_conditions(19, 10) = "Shaft power"
         case_x_conditions(20, 10) = "Efficiency"
         case_x_conditions(21, 10) = "Mol weight "
