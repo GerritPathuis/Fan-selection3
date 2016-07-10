@@ -1806,9 +1806,9 @@ Public Class Form1
                 '---------------- add the fan lines-----------------------
                 For hh = 0 To 50
                     debiet = case_x_flow(hh, 0)
-                    If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)      'Per uur
+                    If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)              'Per uur
                     Chart1.Series(0).Points.AddXY(debiet, Round(case_x_Ptot(hh), 1))
-                    Chart1.Series(5).Points.AddXY(debiet, Round(case_x_Pstat(hh, 0), 1))
+                    Chart1.Series(5).Points.AddXY(debiet, Round(case_x_Pstat(hh, 0), 2))
                     If CheckBox7.Checked Then Chart1.Series(1).Points.AddXY(debiet, Round(case_x_Efficiency(hh), 1))    'efficiency
                     If CheckBox8.Checked Then Chart1.Series(2).Points.AddXY(debiet, Round(case_x_Power(hh, 0), 1))      'Power
                 Next hh
@@ -1817,13 +1817,13 @@ Public Class Form1
                 Chart1.Series(0).Points(45).Label = "P.total"
                 Chart1.Series(5).Points(45).Label = "P.static"
                 If CheckBox7.Checked Then Chart1.Series(1).Points(45).Label = "Efficiency"  'efficiency
-                If CheckBox8.Checked Then Chart1.Series(2).Points(45).Label = "Power"       'Power
+                If CheckBox8.Checked Then Chart1.Series(2).Points(25).Label = "Power"       'Power
 
                 '-------------------Target dot ---------------------
                 If CheckBox3.Checked Then
                     Chart1.Series(3).YAxisType = AxisType.Primary
                     Chart1.Series(3).Points.AddXY(Q_target, P_target)
-                    Chart1.Series(3).Points(0).MarkerStyle = DataVisualization.Charting.MarkerStyle.Star10
+                    Chart1.Series(3).Points(0).MarkerStyle = MarkerStyle.Star10
                     Chart1.Series(3).Points(0).MarkerSize = 20
 
                     '---------------- add the Duct resistance line-----------------------
@@ -1844,21 +1844,25 @@ Public Class Form1
                     Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18}     'Pressure loss coeff (*= 2.5)
                     Dim VC_open = New String() {"80", "70", "60", "50", "40", "30"}
                     Dim point_count As Integer
-                    For jj = 0 To 5
+                    'Dim point_count2 As Integer
+                    For jj = 0 To 5                                                             'No IVC lines in graph
                         For hh = 0 To 50
                             debiet = case_x_flow(hh, 0)
                             If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)          'Per uur
-                            P_loss_IVC(jj + 10, VC_phi(jj), hh, debiet, VC_open(jj))            'Calc and plot to chart
+                            Power_IVC(jj + 10, VC_phi(jj), hh, debiet, VC_open(jj))             'Calc and plot to chart
                         Next
                         point_count = Chart1.Series(jj + 10).Points.Count - 1                   'Last plotted point
                         Chart1.Series(jj + 10).Points(point_count).Label = VC_open(jj) & "° "   'Add the VC opening angle 
+
+                        'point_count2 = Chart1.Series(jj + 20).Points.Count - 1                   'Last plotted point
+                        'Chart1.Series(jj + 20).Points(point_count2).Label = VC_open(jj) & "° "   'Add the VC opening angle 
                     Next
                     Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only"             'Add Remark 
                 End If
 
 
                 '---------------Outlet damper-----------------
-                If CheckBox14.Checked Then
+                If CheckBox16.Checked Then
                     ' P_loss_Out_Flow_damper(Series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
                 End If
 
@@ -1868,16 +1872,16 @@ Public Class Form1
             End Try
         End If
     End Sub
-    'Pressure loss over the Inlet Vane control
-    Private Sub P_loss_IVC(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
+    'Power fan with a IVC (Inlet Vane Control)
+    Private Sub Power_IVC(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
         Dim ivc_area, ivc_speed, ivc_dia, ivc_Power, ivc_loss As Double
         Dim fan_P_static, Pstatic_w_ivc, debiet_sec As Double
 
         Chart1.Series(series).Color = Color.Black                           'Static pressure
 
-        Double.TryParse(TextBox159.Text, ivc_dia)
+        Double.TryParse(TextBox159.Text, ivc_dia)                           'Inlet diameter
         ivc_dia /= 1000                                                     '[m] diameter
-        ivc_area = 3.14 / 4 * ivc_dia ^ 2 * Sin(alpha * PI / 180)           '[m2] open area
+        ivc_area = PI / 4 * ivc_dia ^ 2 * Sin(alpha * PI / 180)             '[m2] open area
 
         debiet_sec = debiet                                                 'debiet in [m3/sec]
         If CheckBox2.Checked Then debiet_sec = debiet / 3600                'debiet in [m3/hr]
@@ -1885,12 +1889,13 @@ Public Class Form1
         ivc_loss = 0.5 * phi * NumericUpDown12.Value * ivc_speed ^ 2        '[mbar]
         fan_P_static = case_x_Pstat(hh, 0)
         Pstatic_w_ivc = fan_P_static - ivc_loss                             '[mbar] Pstatic with IVC
+
         If Pstatic_w_ivc < 0 Then Pstatic_w_ivc = 0
         If ivc_loss < fan_P_static * 0.8 Then Chart1.Series(series).Points.AddXY(debiet, Round(Pstatic_w_ivc, 1))
 
         '----------- Power lines IVC ------------
+        ivc_Power = Round(case_x_Power(hh, 0), 2) * 0.5                     'Opgelet factor 0.5 is fout only testing !!!!!!!!!!!!!!
         If CheckBox14.Checked Then
-            ivc_Power = 15 * Pstatic_w_ivc * debiet / case_x_Efficiency(hh)  '[kW]
             If hh > 10 And ivc_Power > 1 Then Chart1.Series(series + 10).Points.AddXY(debiet, Round(ivc_Power, 1))
         End If
     End Sub
