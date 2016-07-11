@@ -3994,14 +3994,17 @@ Public Class Form1
         case_x_conditions(6, NumericUpDown72.Value) = TextBox160.Text & "x" & TextBox161.Text       'Outlet diemsions [mm]
 
         '----------- inlet data--------------------
-        case_x_conditions(7, NumericUpDown72.Value) = TextBox272.Text                   'Flow [Am3/hr]
-        case_x_conditions(8, NumericUpDown72.Value) = TextBox269.Text                   'Flow [Nm3/hr]
+        case_x_conditions(7, NumericUpDown72.Value) = TextBox272.Text                   'Suction Flow [Am3/hr]
+        If RadioButton6.Checked Then case_x_conditions(7, NumericUpDown72.Value) &= "(2x)"
+        case_x_conditions(8, NumericUpDown72.Value) = TextBox269.Text                   'Suction Flow [Nm3/hr]
+        If RadioButton6.Checked Then case_x_conditions(8, NumericUpDown72.Value) &= "(2x)"
         case_x_conditions(9, NumericUpDown72.Value) = NumericUpDown4.Value.ToString     'Temp [c]
         case_x_conditions(10, NumericUpDown72.Value) = NumericUpDown76.Value.ToString    'Pressure [mbar abs]
         case_x_conditions(11, NumericUpDown72.Value) = NumericUpDown12.Value.ToString   'Density [kg/Am3]
 
         '----------- outlet data--------------------
-        case_x_conditions(12, NumericUpDown72.Value) = TextBox267.Text                  'Volume Flow [Am3/hr]
+        case_x_conditions(12, NumericUpDown72.Value) = TextBox267.Text                  'Discharge Volume Flow [Am3/hr]
+        If RadioButton6.Checked Then case_x_conditions(12, NumericUpDown72.Value) &= "(2x)"
         case_x_conditions(13, NumericUpDown72.Value) = TextBox54.Text                   'Temp uit[c]
         case_x_conditions(14, NumericUpDown72.Value) = TextBox23.Text                   'Static Pressure [mbar abs]
         case_x_conditions(15, NumericUpDown72.Value) = TextBox268.Text                  'Density [kg/Am3]
