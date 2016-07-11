@@ -2059,7 +2059,7 @@ Public Class Form1
         oTable.Range.Font.Bold = False
         oTable.Rows.Item(1).Range.Font.Bold = True
 
-        For j = 0 To 23 'Rows
+        For j = 0 To 24 'Rows
             oTable.Cell(j + 1, 1).Range.Text = case_x_conditions(j, 10)     'Write all variables
             oTable.Cell(j + 1, 2).Range.Text = case_x_conditions(j, 11)     'Write all units
             oTable.Cell(j + 1, 3).Range.Text = case_x_conditions(j, 1)      'Case 1
@@ -2114,10 +2114,10 @@ Public Class Form1
         oTable.Rows.Item(1).Range.Font.Bold = True
         oTable.Cell(1, 1).Range.Text = "Electric Motor"
         oTable.Cell(2, 1).Range.Text = "Speed"
-        oTable.Cell(2, 2).Range.Text = " "
+        oTable.Cell(2, 2).Range.Text = TextBox195.Text
         oTable.Cell(2, 3).Range.Text = "[rpm]"
-        oTable.Cell(3, 1).Range.Text = "Power"
-        oTable.Cell(3, 2).Range.Text = ""
+        oTable.Cell(3, 1).Range.Text = "Installed Power"
+        oTable.Cell(3, 2).Range.Text = ComboBox6.SelectedItem
         oTable.Cell(3, 3).Range.Text = "[kW]"
         oTable.Columns.Item(1).Width = oWord.InchesToPoints(1.3)   'Change width of columns
         oTable.Columns.Item(2).Width = oWord.InchesToPoints(1.55)
@@ -2808,7 +2808,7 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged, NumericUpDown37.ValueChanged
         Update_selectie()
         If CheckBox1.Checked Or CheckBox15.Checked Then Update_selectie()   'Required for pressure loss inlet box and IVC
     End Sub
@@ -3949,6 +3949,7 @@ Public Class Form1
         case_x_conditions(21, 10) = "Mol weight "
         case_x_conditions(22, 10) = "dp Inlet box"
         case_x_conditions(23, 10) = "dp Inlet VC-damper"
+        case_x_conditions(24, 10) = "dp Fan+IVC Stat"
 
         '----------- Units------------------
         case_x_conditions(0, 11) = " "
@@ -3981,6 +3982,7 @@ Public Class Form1
         case_x_conditions(21, 11) = "[g/mol]"
         case_x_conditions(22, 11) = "[mbar]"
         case_x_conditions(23, 11) = "[mbar]"
+        case_x_conditions(24, 11) = "[mbar]"
 
         '----------- general data------------------
         case_x_conditions(0, NumericUpDown72.Value) = TextBox89.Text                                'Case name 
@@ -4015,6 +4017,7 @@ Public Class Form1
         Else
             case_x_conditions(21, NumericUpDown72.Value) = "n.a."
         End If
+
         If CheckBox1.Checked Then
             case_x_conditions(22, NumericUpDown72.Value) = TextBox391.Text              'Inlet box [mBar]
         Else
@@ -4027,6 +4030,11 @@ Public Class Form1
             case_x_conditions(23, NumericUpDown72.Value) = "n.a."
         End If
 
+        If CheckBox1.Checked Or CheckBox15.Checked Then
+            case_x_conditions(24, NumericUpDown72.Value) = TextBox385.Text              'dp Fan+box+IVC [mbar]
+        Else
+            case_x_conditions(24, NumericUpDown72.Value) = "n.a."
+        End If
 
 
         Button11_Click(sender, New System.EventArgs())  'Draw chart1 (calculate the data points before storage)
