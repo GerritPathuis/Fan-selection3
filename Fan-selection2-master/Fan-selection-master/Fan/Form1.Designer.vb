@@ -1325,7 +1325,7 @@ Partial Class Form1
         Me.GroupBox64.Size = New System.Drawing.Size(287, 67)
         Me.GroupBox64.TabIndex = 106
         Me.GroupBox64.TabStop = False
-        Me.GroupBox64.Text = "Inlet pressure loss"
+        Me.GroupBox64.Text = "Inlet pressure loss @ 100% open"
         '
         'Label381
         '
@@ -3052,7 +3052,7 @@ Partial Class Form1
         Me.GroupBox12.Size = New System.Drawing.Size(256, 227)
         Me.GroupBox12.TabIndex = 82
         Me.GroupBox12.TabStop = False
-        Me.GroupBox12.Text = "Inlaat condities"
+        Me.GroupBox12.Text = "Inlaat condities @ inlet box flens"
         '
         'Label336
         '
@@ -4030,7 +4030,6 @@ Partial Class Form1
         'CheckBox14
         '
         Me.CheckBox14.AutoSize = True
-        Me.CheckBox14.Enabled = False
         Me.CheckBox14.Location = New System.Drawing.Point(9, 140)
         Me.CheckBox14.Name = "CheckBox14"
         Me.CheckBox14.Size = New System.Drawing.Size(116, 17)
@@ -4043,9 +4042,9 @@ Partial Class Form1
         Me.CheckBox13.AutoSize = True
         Me.CheckBox13.Location = New System.Drawing.Point(9, 121)
         Me.CheckBox13.Name = "CheckBox13"
-        Me.CheckBox13.Size = New System.Drawing.Size(127, 17)
+        Me.CheckBox13.Size = New System.Drawing.Size(81, 17)
         Me.CheckBox13.TabIndex = 20
-        Me.CheckBox13.Text = "Inlet Vane Control On"
+        Me.CheckBox13.Text = "IVC On (13)"
         Me.CheckBox13.UseVisualStyleBackColor = True
         '
         'CheckBox10

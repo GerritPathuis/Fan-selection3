@@ -9,6 +9,15 @@ Imports System.Threading
 Imports Word = Microsoft.Office.Interop.Word
 Imports System.Runtime.InteropServices
 
+Public Structure IVC_struct
+    Public angle As Double              'Angle 90 degree is 100% open
+    Public phi As Double                'Flow Resistance Coefficient
+    Public flow As Double               'Flow
+    Public pstat As Double              'Pstatic [%]
+    Public power As Double              'Vermogen[kW]
+End Structure
+
+
 Public Structure Tmodel
     Public Tname As String              'Name
     '0-Diameter,1-Toerental,2-Dichtheid,3-Zuigmond diameter,4-Persmond lengte,5-Breedte huis,6-Lengte spiraal,7-a,8-b,9-c,10-d,11-e,
@@ -87,6 +96,7 @@ End Structure
 
 
 Public Class Form1
+    Public IVC(5, 51) As IVC_struct         '5 IVC lines, 50 points
     Public Tschets(31) As Tmodel            'was 31
     Public section(4) As Shaft_section      'Impeller shaft section
     Public cp_air As Double = 1.005         'Specific heat air [kJ/kg.K]
@@ -145,19 +155,19 @@ Public Class Form1
     'Motoren 1500 rpm
     'Vermogen,Toerental, Frame, Lengte, Geluid Lp
     Public Shared emotor_4P() As String = {
-   "4.00; 1500; 112M; 380; 56",
-   "5.50; 1500; 132S; 465; 56",
-   "7.50; 1500; 132M; 505; 59",
-   "11.0; 1500; 160M; 645; 62",
-   "15.0; 1500; 160L; 645; 62",
+   "4.0; 1500; 112M; 380; 56",
+   "5.5; 1500; 132S; 465; 56",
+   "7.5; 1500; 132M; 505; 59",
+   "11; 1500; 160M; 645; 62",
+   "15; 1500; 160L; 645; 62",
    "18.5; 1500; 180M; 700; 62",
-   "22.0; 1500; 180L; 700; 63",
-   "30.0; 1500; 200M; 774; 63",
-   "37.0; 1500; 225S; 866; 66",
-   "45.0; 1500; 225S; 866; 66",
-   "55.0; 1500; 250S; 875; 67",
-   "75.0; 1500; 280S; 1088; 68",
-   "90.0; 1500; 280S; 1088; 68",
+   "22; 1500; 180L; 700; 63",
+   "30; 1500; 200M; 774; 63",
+   "37; 1500; 225S; 866; 66",
+   "45; 1500; 225S; 866; 66",
+   "55; 1500; 250S; 875; 67",
+   "75; 1500; 280S; 1088; 68",
+   "90; 1500; 280S; 1088; 68",
    "110; 1500; 315S; 1204; 70",
    "132; 1500; 315S; 1204; 70",
    "160; 1500; 315S; 1204; 70",
@@ -171,37 +181,15 @@ Public Class Form1
    "560; 1500; 400L; 1928; 85",
    "630; 1500; 400L; 1928; 85",
    "710; 1500; 400L; 1928; 85",
-   "1000; 1500; Spec; 00; 00"}
-
-    'Motoren 3000 rpm
-    'Vermogen,Toerental, Frame, Lengte, Geluid Lp
-    Public Shared emotor_2P() As String = {
-    "4;112M;380;67",
-    "5.5;132S;465;70",
-    "7.7;132S;465;70",
-    "11;160M;645;69",
-    "15;160M;645;69",
-    "18.8;160L;645;69",
-    "22;180M;700;69",
-    "30;200M;774;72",
-    "37;200M;774;72",
-    "45;225S;866;74",
-    "55;250S;875;75",
-    "75;280S;1088;77",
-    "90;280S;1088;77",
-    "110;315S;1174;78",
-    "132;315S;1174;78",
-    "160;315S;1174;78",
-    "200;315M;1285;78",
-    "250;355S;1494;83",
-    "315;355SM;1546;83",
-    "355;355SM;1546;83",
-    "400;355M;1651;83",
-    "450;355M;1651;83",
-    "500;400L;1828;85",
-    "560;400L;1828;85"}
-
-
+   "1000; 1500; Spec; 00; 00",
+   "1100; 1500; Spec; 00; 00",
+   "1250; 1500; Spec; 00; 00",
+   "1400; 1500; Spec; 00; 00",
+   "1600; 1500; Spec; 00; 00",
+   "1800; 1500; Spec; 00; 00",
+   "2000; 1500; Spec; 00; 00",
+   "2200; 1500; Spec; 00; 00",
+   "2500; 1500; Spec; 00; 00"}
 
     'Hz; rpm; Koppel_%,
     Public Shared EXD_VSD_torque() As String = {
@@ -1009,7 +997,7 @@ Public Class Form1
         Dim length_naaf, gewicht_pulley As Double
         Dim sg_staal As Double
         Dim n_krit, Waaier_gewicht As Double
-        Dim Back_plate_steel_1, Back_plate_steel_2, Back_plate_steel_3 As Double
+        Dim combi_dikte, Back_plate_steel_1, Back_plate_steel_2, Back_plate_steel_3 As Double
         Dim Front_plate_steel_1, Front_plate_steel_2, Front_plate_steel_3 As Double
         Dim airf_hoog_uitw, airf_skin_plaat_dikte As Double
         Dim rib_plaat_dikte, rib_afstand, aantal_ribben As Double
@@ -1123,9 +1111,12 @@ Public Class Form1
 
         '------------ Eigen frequenties bodemplaat ---------------------------
         '------------ Roarks, 8 edition, pagina 793 --------------------------
-        Back_plate_steel_1 = 10000 * 4.4 * (NumericUpDown17.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
-        Back_plate_steel_2 = 10000 * 20.33 * (NumericUpDown17.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
-        Back_plate_steel_3 = 10000 * 59.49 * (NumericUpDown17.Value / 25.4) / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
+        'T33, OD1800, Achterplaat 15mm, voorplaat 8mm eigen frequentie 41Hz bron FSDynamics
+        '------------Kennelijk egeen invloed van de schoepen-----------
+        combi_dikte = (NumericUpDown17.Value + NumericUpDown17.Value + 0) / 25.4        'In inches
+        Back_plate_steel_1 = 10000 * 4.4 * combi_dikte / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
+        Back_plate_steel_2 = 10000 * 20.33 * combi_dikte / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
+        Back_plate_steel_3 = 10000 * 59.49 * combi_dikte / (NumericUpDown21.Value * 0.5 / 25.4) ^ 2
 
 
         '------------ Eigen frequenties Voorplaat ---------------------------
@@ -1840,24 +1831,53 @@ Public Class Form1
                 End If
 
                 '-------------------Inlet Vane Control lines ---------------------
-                If CheckBox13.Checked Then
-                    Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18}     'Pressure loss coeff (*= 2.5)
-                    Dim VC_open = New String() {"80", "70", "60", "50", "40", "30"}
-                    Dim point_count As Integer
-                    'Dim point_count2 As Integer
-                    For jj = 0 To 5                                                             'No IVC lines in graph
-                        For hh = 0 To 50
-                            debiet = case_x_flow(hh, 0)
-                            If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)          'Per uur
-                            Power_IVC(jj + 10, VC_phi(jj), hh, debiet, VC_open(jj))             'Calc and plot to chart
-                        Next
-                        point_count = Chart1.Series(jj + 10).Points.Count - 1                   'Last plotted point
-                        Chart1.Series(jj + 10).Points(point_count).Label = VC_open(jj) & "° "   'Add the VC opening angle 
+                Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18}     'Pressure loss coeff (*= 2.5)
+                Dim VC_open = New String() {"80", "70", "60", "50", "40", "30"}
+                Dim point_count As Integer
+                Dim point_count2 As Integer
 
-                        'point_count2 = Chart1.Series(jj + 20).Points.Count - 1                   'Last plotted point
-                        'Chart1.Series(jj + 20).Points(point_count2).Label = VC_open(jj) & "° "   'Add the VC opening angle 
+
+                For line = 0 To 5                                                                'No IVC lines in graph
+                    For hh = 0 To 50
+                        debiet = case_x_flow(hh, 0)
+                        If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)                  'Per uur
+
+                        '-----------------CALC IVC -----
+                        IVC(line, hh).angle = Convert.ToDouble(VC_open(line))
+                        IVC(line, hh).flow = case_x_flow(hh, 0)
+                        IVC(line, hh).phi = VC_phi(line)
+                        IVC(line, hh).pstat = case_x_Pstat(hh, 0) - dp_IVC(IVC(line, hh).phi, IVC(line, hh).flow, IVC(line, hh).angle)
+                        If IVC(line, hh).pstat < 0 Then IVC(line, hh).pstat = 0
+
+                        IVC(line, hh).power = IVC(line, hh).flow * IVC(line, hh).pstat * 10 / case_x_Efficiency(hh)        'Gok 80% Efficiency
+                    Next hh
+                Next line
+
+                '------------ Now present-------------------------
+                For line = 0 To 5                                                                   'No IVC lines in graph
+                    Chart1.Series(line + 10).Color = Color.Black                                    'Static pressure
+                    For hh = 0 To 50
+                        debiet = case_x_flow(hh, 0)
+                        If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)                  'Per uur
+                        If CheckBox13.Checked And IVC(line, hh).pstat > 10 Then                     'Static Pressure
+                            Chart1.Series(line + 10).Points.AddXY(debiet, Round(IVC(line, hh).pstat, 1))
+                        End If
+
+                        If CheckBox14.Checked And IVC(line, hh).power > 5 Then                      'IVC Power lines
+                            Chart1.Series(line + 20).Points.AddXY(debiet, Round(IVC(line, hh).power, 1))
+                        End If
                     Next
-                    Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only"             'Add Remark 
+                    point_count = Chart1.Series(line + 10).Points.Count - 1                         'Last plotted point
+                    Chart1.Series(line + 10).Points(point_count).Label = VC_open(line) & "° (Pstat)"       'Add the VC opening angle 
+
+                    If CheckBox14.Checked Then
+                        point_count2 = Chart1.Series(line + 20).Points.Count - 1                    'Last plotted point
+                        Chart1.Series(line + 20).Points(point_count2).Label = VC_open(line) & "° (Power)"  'Add the VC opening angle 
+                    End If
+                Next
+
+                If CheckBox13.Checked Then
+                    Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only"      'Add Remark 
                 End If
 
 
@@ -1874,10 +1894,20 @@ Public Class Form1
     End Sub
     'Power fan with a IVC (Inlet Vane Control)
     Private Sub Power_IVC(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
-        Dim ivc_area, ivc_speed, ivc_dia, ivc_Power, ivc_loss As Double
-        Dim fan_P_static, Pstatic_w_ivc, debiet_sec As Double
+        Dim ivc_Power, ivc_loss, Pstatic_w_ivc, flow_ratio, IVC_power_factor As Double
 
-        Chart1.Series(series).Color = Color.Black                           'Static pressure
+        ivc_loss = dp_IVC(phi, debiet, alpha)
+        Pstatic_w_ivc = case_x_Pstat(hh, 0) - ivc_loss '[mbar] Pstatic with IVC
+
+        '----------- Flow-Pressure lines ----------
+        If Pstatic_w_ivc < 0 Then Pstatic_w_ivc = 0
+
+        '----------- Power lines IVC ------------
+        'flow_ratio = debiet / case_x_flow(50, 0)
+        'IVC_power_factor = 0.879426497714746 * flow_ratio ^ 3 - 0.531089067 * flow_ratio ^ 2 + 0.296278586762753 * flow_ratio + 0.353229909170114
+    End Sub
+    Private Function dp_IVC(phi As Double, debiet As Double, alpha As Double)
+        Dim ivc_area, ivc_speed, ivc_dia, ivc_loss, debiet_sec As Double
 
         Double.TryParse(TextBox159.Text, ivc_dia)                           'Inlet diameter
         ivc_dia /= 1000                                                     '[m] diameter
@@ -1887,18 +1917,9 @@ Public Class Form1
         If CheckBox2.Checked Then debiet_sec = debiet / 3600                'debiet in [m3/hr]
         ivc_speed = debiet_sec / ivc_area                                   '[m/s]
         ivc_loss = 0.5 * phi * NumericUpDown12.Value * ivc_speed ^ 2        '[mbar]
-        fan_P_static = case_x_Pstat(hh, 0)
-        Pstatic_w_ivc = fan_P_static - ivc_loss                             '[mbar] Pstatic with IVC
+        Return (ivc_loss)
+    End Function
 
-        If Pstatic_w_ivc < 0 Then Pstatic_w_ivc = 0
-        If ivc_loss < fan_P_static * 0.8 Then Chart1.Series(series).Points.AddXY(debiet, Round(Pstatic_w_ivc, 1))
-
-        '----------- Power lines IVC ------------
-        ivc_Power = Round(case_x_Power(hh, 0), 2) * 0.5                     'Opgelet factor 0.5 is fout only testing !!!!!!!!!!!!!!
-        If CheckBox14.Checked Then
-            If hh > 10 And ivc_Power > 1 Then Chart1.Series(series + 10).Points.AddXY(debiet, Round(ivc_Power, 1))
-        End If
-    End Sub
     'Pressure loss over the Outlet Flow Damper
     Private Sub P_loss_Out_Flow_damper(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
         'Future
@@ -1973,26 +1994,26 @@ Public Class Form1
     End Sub
     'Find workpoint hight efficiency
     Private Sub Find_hi_eff()
-        Dim hh, jj, pos_counter As Integer
+        Dim hh, jjr, pos_counter As Integer
         Dim eff_hi As Double
 
-        For jj = 0 To (Tschets.Length - 2)                '30 T schetsen 
+        For jjr = 0 To (Tschets.Length - 2)                '30 T schetsen 
             eff_hi = 0
             pos_counter = 0
             For hh = 0 To 11                'Check all Efficiencies to find the highest
-                If Tschets(jj).Teff(hh) > eff_hi Then
-                    eff_hi = Tschets(jj).Teff(hh)
+                If Tschets(jjr).Teff(hh) > eff_hi Then
+                    eff_hi = Tschets(jjr).Teff(hh)
                     pos_counter = hh
                 End If
             Next hh
 
-            Tschets(jj).werkp_opT(0) = Tschets(jj).Teff(pos_counter)    'rendement
-            Tschets(jj).werkp_opT(1) = Tschets(jj).TPtot(pos_counter)   'P_totaal [Pa]
-            Tschets(jj).werkp_opT(2) = Tschets(jj).TPstat(pos_counter)  'P_statisch [Pa]
-            Tschets(jj).werkp_opT(3) = Tschets(jj).Tverm(pos_counter)   'as_vermogen [kW]
-            Tschets(jj).werkp_opT(4) = Tschets(jj).TFlow(pos_counter)   'debiet[m3/sec]
-            'MessageBox.Show("JJ=" & jj.ToString &" aantal hh =" & hh)
-        Next jj
+            Tschets(jjr).werkp_opT(0) = Tschets(jjr).Teff(pos_counter)    'rendement
+            Tschets(jjr).werkp_opT(1) = Tschets(jjr).TPtot(pos_counter)   'P_totaal [Pa]
+            Tschets(jjr).werkp_opT(2) = Tschets(jjr).TPstat(pos_counter)  'P_statisch [Pa]
+            Tschets(jjr).werkp_opT(3) = Tschets(jjr).Tverm(pos_counter)   'as_vermogen [kW]
+            Tschets(jjr).werkp_opT(4) = Tschets(jjr).TFlow(pos_counter)   'debiet[m3/sec]
+            'MessageBox.Show("jjr=" & jjr.ToString &" aantal hh =" & hh)
+        Next jjr
     End Sub
 
     'Write data to Word 
@@ -2566,7 +2587,7 @@ Public Class Form1
 
     Private Sub find_zero_torque()
         Dim T1, T2, T3, omg1, omg2, omg3 As Double
-        Dim jj As Integer
+        Dim jjr As Integer
 
         'TextBox158.Clear()
 
@@ -2579,7 +2600,7 @@ Public Class Form1
         T3 = calc_zeroTorsion_4(omg3)
 
         '-------------Iteratie 30x halveren moet voldoende zijn ---------------
-        For jj = 0 To 30
+        For jjr = 0 To 30
             If T1 * T3 < 0 Then
                 omg2 = omg3
             Else
@@ -2589,7 +2610,7 @@ Public Class Form1
             T1 = calc_zeroTorsion_4(omg1)
             T2 = calc_zeroTorsion_4(omg2)
             T3 = calc_zeroTorsion_4(omg3)
-        Next
+        Next jjr
         TextBox84.Text = Round((omg3 * 60 / (2 * PI)), 0)        '[rad/s --> rpm]
         If T3 > 1 Then   'Residual torque too big,  problem in choosen bouderies
             TextBox84.BackColor = Color.Red
@@ -3994,27 +4015,27 @@ Public Class Form1
         case_x_conditions(6, NumericUpDown72.Value) = TextBox160.Text & "x" & TextBox161.Text       'Outlet diemsions [mm]
 
         '----------- inlet data--------------------
-        case_x_conditions(7, NumericUpDown72.Value) = TextBox272.Text                   'Suction Flow [Am3/hr]
-        If RadioButton6.Checked Then case_x_conditions(7, NumericUpDown72.Value) &= "(2x)"
-        case_x_conditions(8, NumericUpDown72.Value) = TextBox269.Text                   'Suction Flow [Nm3/hr]
-        If RadioButton6.Checked Then case_x_conditions(8, NumericUpDown72.Value) &= "(2x)"
-        case_x_conditions(9, NumericUpDown72.Value) = NumericUpDown4.Value.ToString     'Temp [c]
-        case_x_conditions(10, NumericUpDown72.Value) = NumericUpDown76.Value.ToString    'Pressure [mbar abs]
-        case_x_conditions(11, NumericUpDown72.Value) = NumericUpDown12.Value.ToString   'Density [kg/Am3]
+        case_x_conditions(7, NumericUpDown72.Value) = TextBox272.Text                       'Suction Flow [Am3/hr]
+        If RadioButton6.Checked Then case_x_conditions(7, NumericUpDown72.Value) &= "(2x)"  'Double suction
+        case_x_conditions(8, NumericUpDown72.Value) = TextBox269.Text                       'Suction Flow [Nm3/hr]
+        If RadioButton6.Checked Then case_x_conditions(8, NumericUpDown72.Value) &= "(2x)"  'Double suction
+        case_x_conditions(9, NumericUpDown72.Value) = NumericUpDown4.Value.ToString         'Temp [c]
+        case_x_conditions(10, NumericUpDown72.Value) = NumericUpDown76.Value.ToString       'Pressure [mbar abs]
+        case_x_conditions(11, NumericUpDown72.Value) = NumericUpDown12.Value.ToString       'Density [kg/Am3]
 
         '----------- outlet data--------------------
-        case_x_conditions(12, NumericUpDown72.Value) = TextBox267.Text                  'Discharge Volume Flow [Am3/hr]
-        If RadioButton6.Checked Then case_x_conditions(12, NumericUpDown72.Value) &= "(2x)"
-        case_x_conditions(13, NumericUpDown72.Value) = TextBox54.Text                   'Temp uit[c]
-        case_x_conditions(14, NumericUpDown72.Value) = TextBox23.Text                   'Static Pressure [mbar abs]
-        case_x_conditions(15, NumericUpDown72.Value) = TextBox268.Text                  'Density [kg/Am3]
+        case_x_conditions(12, NumericUpDown72.Value) = TextBox267.Text                      'Discharge Volume Flow [Am3/hr]
+        If RadioButton6.Checked Then case_x_conditions(12, NumericUpDown72.Value) &= "(2x)" 'Double suction
+        case_x_conditions(13, NumericUpDown72.Value) = TextBox54.Text                       'Temp uit[c]
+        case_x_conditions(14, NumericUpDown72.Value) = TextBox23.Text                       'Static Pressure [mbar abs]
+        case_x_conditions(15, NumericUpDown72.Value) = TextBox268.Text                      'Density [kg/Am3]
 
         '----------- performance-------------------
-        case_x_conditions(16, NumericUpDown72.Value) = TextBox271.Text                  'Static dP [mbar.g]
-        case_x_conditions(17, NumericUpDown72.Value) = TextBox75.Text                   'Dynamic dP [mbar.g]
-        case_x_conditions(18, NumericUpDown72.Value) = TextBox273.Text                  'Total dP [mbar.g]
-        case_x_conditions(19, NumericUpDown72.Value) = TextBox274.Text                  'Shaft power [kW]
-        case_x_conditions(20, NumericUpDown72.Value) = TextBox275.Text                  'Efficiency [%]
+        case_x_conditions(16, NumericUpDown72.Value) = TextBox271.Text                      'Static dP [mbar.g]
+        case_x_conditions(17, NumericUpDown72.Value) = TextBox75.Text                       'Dynamic dP [mbar.g]
+        case_x_conditions(18, NumericUpDown72.Value) = TextBox273.Text                      'Total dP [mbar.g]
+        case_x_conditions(19, NumericUpDown72.Value) = TextBox274.Text                      'Shaft power [kW]
+        case_x_conditions(20, NumericUpDown72.Value) = TextBox275.Text                      'Efficiency [%]
         If RadioButton3.Checked Then    'Density given or calculated
             case_x_conditions(21, NumericUpDown72.Value) = NumericUpDown8.Value.ToString
         Else
@@ -4448,8 +4469,6 @@ Public Class Form1
         Chart5.Titles.Clear()
         Chart5.ChartAreas.Clear()
         Chart5.ChartAreas.Add("ChartArea0")
-
-
 
         Try
             For hh = 1 To 9 'Determine how many cases there are
