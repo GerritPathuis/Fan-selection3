@@ -1835,7 +1835,7 @@ Public Class Form1
                 Dim VC_open = New String() {"80", "70", "60", "50", "40", "30"}
                 Dim point_count As Integer
                 Dim point_count2 As Integer
-
+                Dim ivg_dp, ivg_pow As Double
 
                 For line = 0 To 5                                                                'No IVC lines in graph
                     For hh = 0 To 50
@@ -1846,10 +1846,12 @@ Public Class Form1
                         IVC(line, hh).angle = Convert.ToDouble(VC_open(line))
                         IVC(line, hh).flow = case_x_flow(hh, 0)
                         IVC(line, hh).phi = VC_phi(line)
-                        IVC(line, hh).pstat = case_x_Pstat(hh, 0) - dp_IVC(IVC(line, hh).phi, IVC(line, hh).flow, IVC(line, hh).angle)
-                        If IVC(line, hh).pstat < 0 Then IVC(line, hh).pstat = 0
 
-                        IVC(line, hh).power = IVC(line, hh).flow * IVC(line, hh).pstat * 10 / case_x_Efficiency(hh)        'Gok 80% Efficiency
+                        dp_IVC(IVC(line, hh).phi, IVC(line, hh).flow, IVC(line, hh).angle, ivg_dp, ivg_pow)
+                        IVC(line, hh).pstat = case_x_Pstat(hh, 0) - ivg_dp                          'Pressure lines
+                        IVC(line, hh).power = case_x_Power(hh, 0) - ivg_pow                         'Power lines
+
+                        If IVC(line, hh).pstat < 0 Then IVC(line, hh).pstat = 0
                     Next hh
                 Next line
 
@@ -1863,7 +1865,8 @@ Public Class Form1
                             Chart1.Series(line + 10).Points.AddXY(debiet, Round(IVC(line, hh).pstat, 1))
                         End If
 
-                        If CheckBox14.Checked And IVC(line, hh).power > 5 Then                      'IVC Power lines
+                        '------------------ NEEDS WORK----------------
+                        If CheckBox14.Checked And IVC(line, hh).power > case_x_Power(8, 0) Then                      'IVC Power lines
                             Chart1.Series(line + 20).Points.AddXY(debiet, Round(IVC(line, hh).power, 1))
                         End If
                     Next
@@ -1892,33 +1895,22 @@ Public Class Form1
             End Try
         End If
     End Sub
-    'Power fan with a IVC (Inlet Vane Control)
-    Private Sub Power_IVC(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
-        Dim ivc_Power, ivc_loss, Pstatic_w_ivc, flow_ratio, IVC_power_factor As Double
 
-        ivc_loss = dp_IVC(phi, debiet, alpha)
-        Pstatic_w_ivc = case_x_Pstat(hh, 0) - ivc_loss '[mbar] Pstatic with IVC
-
-        '----------- Flow-Pressure lines ----------
-        If Pstatic_w_ivc < 0 Then Pstatic_w_ivc = 0
-
-        '----------- Power lines IVC ------------
-        'flow_ratio = debiet / case_x_flow(50, 0)
-        'IVC_power_factor = 0.879426497714746 * flow_ratio ^ 3 - 0.531089067 * flow_ratio ^ 2 + 0.296278586762753 * flow_ratio + 0.353229909170114
-    End Sub
-    Private Function dp_IVC(phi As Double, debiet As Double, alpha As Double)
-        Dim ivc_area, ivc_speed, ivc_dia, ivc_loss, debiet_sec As Double
+    Private sub dp_IVC(ByVal phi As Double, ByVal debiet As Double, ByVal alpha As Double, ByRef ivc_loss As Double, ByRef ivc_power As Double)
+        Dim ivc_area, ivc_speed, ivc_dia, ivc_density, debiet_sec As Double
 
         Double.TryParse(TextBox159.Text, ivc_dia)                           'Inlet diameter
         ivc_dia /= 1000                                                     '[m] diameter
         ivc_area = PI / 4 * ivc_dia ^ 2 * Sin(alpha * PI / 180)             '[m2] open area
+        ivc_density = NumericUpDown12.Value                                 '[kg/m3]
 
         debiet_sec = debiet                                                 'debiet in [m3/sec]
         If CheckBox2.Checked Then debiet_sec = debiet / 3600                'debiet in [m3/hr]
         ivc_speed = debiet_sec / ivc_area                                   '[m/s]
-        ivc_loss = 0.5 * phi * NumericUpDown12.Value * ivc_speed ^ 2        '[mbar]
-        Return (ivc_loss)
-    End Function
+        ivc_loss = 0.5 * phi * ivc_density * ivc_speed ^ 2                  '[mbar]
+        ivc_power = ivc_loss * ivc_speed / 100                              '[kW]
+    End sub
+
 
     'Pressure loss over the Outlet Flow Damper
     Private Sub P_loss_Out_Flow_damper(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
