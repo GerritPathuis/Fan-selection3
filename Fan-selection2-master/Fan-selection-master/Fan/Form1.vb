@@ -2017,6 +2017,7 @@ Public Class Form1
         Dim oTable As Word.Table
         Dim oPara1, oPara2, oPara4 As Word.Paragraph
         Dim j As Integer
+        Dim ufilename As String
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
@@ -2160,7 +2161,6 @@ Public Class Form1
         oPara4.Range.InlineShapes.Item(1).Width = 500
         oPara4.Range.InsertParagraphAfter()
 
-
         '---- save tab page 1---------------
         TabPage2.Show()
         TabPage2.Refresh()
@@ -2184,6 +2184,21 @@ Public Class Form1
         oPara4.Range.InlineShapes.Item(1).LockAspectRatio = True
         'oPara4.Range.InlineShapes.Item(1).Width = 400
         oPara4.Range.InsertParagraphAfter()
+
+        Try
+            ufilename = "C:\temp\" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & "_Fan_selection.docx"
+            MessageBox.Show("File saved at " & ufilename)
+            oDoc.SaveAs(ufilename)
+            oDoc.Close()
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)  ' Show the exception's message.
+        Finally
+            'quit Word
+            If Not IsNothing(oWord) Then
+                oWord.Quit()
+                oWord = Nothing
+            End If
+        End Try
 
     End Sub
     'Graphic next model

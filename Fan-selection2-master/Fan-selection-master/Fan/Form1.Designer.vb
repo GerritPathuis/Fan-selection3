@@ -13037,7 +13037,7 @@ Partial Class Form1
         Me.ClientSize = New System.Drawing.Size(1318, 734)
         Me.Controls.Add(Me.TabControl1)
         Me.Name = "Form1"
-        Me.Text = "VTK_fan_select dd 06-07-2016"
+        Me.Text = "VTK_fan_select dd 08-08-2016"
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage1.ResumeLayout(False)
         Me.TabPage1.PerformLayout()
