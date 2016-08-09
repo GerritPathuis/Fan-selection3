@@ -2042,7 +2042,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 5, 3)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 6, 3)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 11
         oTable.Range.Font.Bold = False
@@ -2057,7 +2057,7 @@ Public Class Form1
         oTable.Cell(4, 1).Range.Text = "Author "
         oTable.Cell(4, 2).Range.Text = Environment.UserName
         oTable.Cell(5, 1).Range.Text = "Date "
-        oTable.Cell(6, 2).Range.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        oTable.Cell(5, 2).Range.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
 
         oTable.Columns.Item(1).Width = oWord.InchesToPoints(2.5)   'Change width of columns 
         oTable.Columns.Item(2).Width = oWord.InchesToPoints(2)
@@ -2186,18 +2186,18 @@ Public Class Form1
         oPara4.Range.InsertParagraphAfter()
 
         Try
-            ufilename = "C:\temp\" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & "_Fan_selection.docx"
-            MessageBox.Show("File saved at " & ufilename)
-            oDoc.SaveAs(ufilename)
-            oDoc.Close()
+            'ufilename = "C:\temp\" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & "_Fan_selection.docx"
+            'MessageBox.Show("File saved at " & ufilename)
+            'oDoc.SaveAs(ufilename)
+            ' oDoc.Close()
         Catch ex As Exception
             MessageBox.Show(ex.Message)  ' Show the exception's message.
-        Finally
-            'quit Word
-            If Not IsNothing(oWord) Then
-                oWord.Quit()
-                oWord = Nothing
-            End If
+            'Finally
+            '    'quit Word
+            '    If Not IsNothing(oWord) Then
+            '        oWord.Quit()
+            '        oWord = Nothing
+            '    End If
         End Try
 
     End Sub
