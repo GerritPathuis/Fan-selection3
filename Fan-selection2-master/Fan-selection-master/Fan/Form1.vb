@@ -181,6 +181,8 @@ Public Class Form1
    "560; 1500; 400L; 1928; 85",
    "630; 1500; 400L; 1928; 85",
    "710; 1500; 400L; 1928; 85",
+   "800; 1500; 400L; 1928; 00",
+   "900; 1500; 400L; 1928; 00",
    "1000; 1500; Spec; 00; 00",
    "1100; 1500; Spec; 00; 00",
    "1250; 1500; Spec; 00; 00",
@@ -2017,7 +2019,7 @@ Public Class Form1
         Dim oTable As Word.Table
         Dim oPara1, oPara2, oPara4 As Word.Paragraph
         Dim j As Integer
-        Dim ufilename As String
+        'Dim ufilename As String
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
