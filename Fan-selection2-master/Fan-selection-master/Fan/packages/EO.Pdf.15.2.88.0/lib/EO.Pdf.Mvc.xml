@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+<doc>
+  <assembly>
+    <name>EO.Pdf.Mvc</name>
+  </assembly>
+  <members>
+    <member name="T:EO.Pdf.Mvc.MVCToPDF">
+      <summary>
+            Utitlies class to convert an ASP.NET MVC page to a PDF file.
+            </summary>
+    </member>
+    <member name="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF(System.EventHandler,EO.Pdf.PdfDocumentEventHandler)">
+      <summary>
+             Renders the current page as PDF.
+             </summary>
+      <param name="beforeConvertHandler">A function to be called before the conversion.</param>
+      <param name="afterConvertHandler">A function to be called to perform post processing with the result PDF file
+             before sending it to the client.</param>
+      <remarks>
+        <para>
+             In order to render a page as PDF, you must first apply 
+             <see cref="T:EO.Pdf.Mvc.RenderAsPDFAttribute" /> to the corresponding action method in the controller.
+             By default, the RenderAsPdfAttribute's <see cref="P:EO.Pdf.Mvc.RenderAsPDFAttribute.AutoConvert" /> is
+             set to <b>true</b>, in which case <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> will be automatically called.
+             </para>
+        <para>
+             Alternatively, you can also set <see cref="P:EO.Pdf.Mvc.RenderAsPDFAttribute.AutoConvert" /> to false
+             and call <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> manually from your action method.
+             </para>
+        <para>
+             The <i>beforeConvertHandler</i> argument can be used to set HTML to PDF conversion options.
+             For example, the following code overrides the default base Url:
+             </para>
+        <code lang="C#" title="C#">
+             private void ConvertToPDF()
+             {
+                 //Call RenderAsPDF with BeforeConvertHandler
+                 MVCToPDF.RenderAsPDF(BeforeConvertHandler, null);
+             }
+             
+             private void BeforeConvertHandler(object sender, EventArgs e)
+             {
+                 HtmlToPdf.Options.BaseUrl = your_alternative_base_url;
+             }
+             </code>
+        <code>
+             Private Sub ConvertToPDF()
+                 'Call RenderAsPDF with BeforeConvertHandler
+                 MVCToPDF.RenderAsPDF(AddressOf BeforeConvertHandler, Nothing)
+             End Sub
+            
+             Private Sub BeforeConvertHandler(sender As Object, e As EventArgs)
+                 HtmlToPdf.Options.BaseUrl = your_alternative_base_url
+             End Sub
+             </code>
+        <para>
+             The <i>afterConvertHandler</i> argument can be used to perform additional post processing with
+             the result PDF file before sending it to the client. The following code demonstrates how
+             to use this feature:
+             </para>
+        <code lang="C#" title="C#">
+             private void ConvertToPDF()
+             {
+                 //Call RenderAsPDF with Post_Handler
+                 MVCToPDF.RenderAsPDF(null, Post_Handler);
+             }
+             
+             //This function will be called after the conversion is done
+             private void Post_Handler(object sender, PdfDocumentEventArgs e)
+             {
+                 //Load a cover letter PDF file
+                 PdfDocument coverLetter = new PdfDocument(cover_letter_pdf_file_name);
+                 
+                 //Merge it with the result file and return the merged
+                 //document as the new result
+                 e.Document = PdfDocument.Merge(coverLetter, e.Document);
+             }
+             </code>
+        <code lang="VB" title="Visual Basic.NET">
+             Private Sub ConvertToPDF()
+             	'Call RenderAsPDF with Post_Handler
+             	MVCToPDF.RenderAsPDF(Nothing, AddressOf Post_Handler)
+             End Sub
+             
+             'This function will be called after the conversion is done
+             Private Sub Post_Handler(sender As Object, e As PdfDocumentEventArgs)
+             	'Load a cover letter PDF file
+             	Dim coverLetter As New PdfDocument(cover_letter_pdf_file_name)
+             
+             	'Merge it with the result file and return the merged
+             	'document as the new result
+             	e.Document = PdfDocument.Merge(coverLetter, e.Document)
+             End Sub
+             </code>
+        <para>Pass <i>null</i> (Visual Basic <i>Nothing</i>) to <i>postHandler</i> to not to
+             perform any post processing on the result PDF file.</para>
+      </remarks>
+    </member>
+    <member name="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF(EO.Pdf.PdfDocumentEventHandler)">
+      <summary>
+            Renders the current page as PDF.
+            </summary>
+      <param name="afterConvertHandler">A function to be called to perform post processing with the result PDF file
+            before sending it to the client.</param>
+      <remarks>
+            This function calls <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF(System.EventHandler,EO.Pdf.PdfDocumentEventHandler)">RenderAsPDF(EventHandler, PdfDocumentEventHandler)</see>&gt;
+            by passing null value to <i>beforeConvertHandler</i> argument.
+            </remarks>
+    </member>
+    <member name="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF">
+      <summary>
+            Renders the current page as PDF.
+            </summary>
+      <remarks>
+            This method calls <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF(EO.Pdf.PdfDocumentEventHandler)">RenderAsPDF(PdfDocumentEventHandler)</see>
+            with a null <i>postHandler</i> value.
+            </remarks>
+    </member>
+    <member name="M:EO.Pdf.Mvc.MVCToPDF.RegisterFilter(System.Type)">
+      <summary>
+            Creates a filter object to be registered with ASP.NET MVC.
+            </summary>
+    </member>
+    <member name="M:EO.Pdf.Mvc.MVCToPDF.OnFilter(System.Object)">
+      <summary>
+            Called by MVCToPDF infrastructure.
+            </summary>
+      <remarks>
+            You should not call this method directly.
+            </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.MVCToPDF.SendToClient">
+      <summary>
+            Gets or sets a value indicating whether to send the conversion result to the client.
+            </summary>
+      <remarks>
+        <para>
+            By default this property is true, in that case the result PDF file is sent to the 
+            client, either directly open in the browser window 
+            (when <see cref="P:EO.Pdf.Mvc.MVCToPDF.ResultAsDownload" /> is <b>false</b>) or as a download
+            (when <see cref="P:EO.Pdf.Mvc.MVCToPDF.ResultAsDownload" /> is <b>true</b>). Set this property to <b>false</b> if you do
+            not send the result to the client. In that case you can use <see cref="P:EO.Pdf.Mvc.MVCToPDF.Result" /> property
+            to fetch the conversion result.
+            </para>
+        <para>
+            Note this property is only used when <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is manually called.
+            When <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is automatically called, you should use 
+            <b>RenderAsPdfAttribute.SendToClient</b> instead.
+            </para>
+      </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.MVCToPDF.ResultAsDownload">
+      <summary>
+            Gets or sets a value indicating whether to send the result as a file download.
+            </summary>
+      <remarks>
+        <para>
+            By default this property is true, in that case the result PDF file is sent to the
+            client as a file download. You can use <see cref="P:EO.Pdf.Mvc.MVCToPDF.ResultFileName" /> to specify the
+            download file name.
+            </para>
+        <para>
+            Note this property is only used when <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is manually called.
+            When <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is automatically called, you should use 
+            <b>RenderAsPdfAttribute.ResultAsDownload</b> instead.
+            </para>
+      </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.MVCToPDF.ResultFileName">
+      <summary>
+            Gets or sets the result PDF file name.
+            </summary>
+      <remarks>
+        <para>
+            By default, the conversion result is sent to the client as a file download. Use this
+            property to specify the result file name.
+            </para>
+        <para>
+            Note this property is only used when <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is manually called.
+            When <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is automatically called, you should use 
+            <b>RenderAsPdfAttribute.PdfFileName</b> instead.
+            </para>
+      </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.MVCToPDF.AutoFormsAuthentication">
+      <summary>
+            Gets or sets a value indicating whether MVCToPDF should impersonate
+            the current forms authentication user identify.
+            </summary>
+      <remarks>
+        <para>
+            Note this property is only used when <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is manually called.
+            When <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF" /> is automatically called, you should use 
+            <b>RenderAsPdfAttribute.AutoFormsAuthentication</b> instead.
+            </para>
+      </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.MVCToPDF.Result">
+      <summary>
+            Gets the conversion result. 
+            </summary>
+      <remarks>
+            You can use the <see cref="P:EO.Pdf.HtmlToPdfResult.PdfDocument" /> property of the returned
+            <see cref="T:EO.Pdf.HtmlToPdfResult" /> object to get the <see cref="T:EO.Pdf.PdfDocument" /> object.
+            This property is only available after the controller's <b>OnResultExecuted</b>
+            method is called.
+            </remarks>
+    </member>
+    <member name="T:EO.Pdf.Mvc.RenderAsPDFAttribute">
+      <summary>
+            An attribute that you can apply to your action method in order to convert the
+            action result into PDF.
+            </summary>
+    </member>
+    <member name="M:EO.Pdf.Mvc.RenderAsPDFAttribute.#ctor">
+      <summary>
+            Initializes a new instance of the <see cref="T:EO.Pdf.Mvc.RenderAsPDFAttribute" />.
+            </summary>
+    </member>
+    <member name="P:EO.Pdf.Mvc.RenderAsPDFAttribute.AutoConvert">
+      <summary>
+            Gets or sets a value indicating whether <see cref="M:EO.Pdf.Mvc.MVCToPDF.RenderAsPDF">MVCToPDF.RenderAsPDF</see> should be automatically called.
+            </summary>
+      <remarks>
+            The default value is true.
+            </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.RenderAsPDFAttribute.AutoFormsAuthentication">
+      <summary>
+            Gets or sets the default value for <see cref="P:EO.Pdf.Mvc.MVCToPDF.AutoFormsAuthentication">MVCToPDF.AutoFormsAuthentication</see>.
+            </summary>
+      <remarks>
+            The default value is true.
+            </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.RenderAsPDFAttribute.SendToClient">
+      <summary>
+            Gets or sets the default value for <see cref="P:EO.Pdf.Mvc.MVCToPDF.SendToClient">MVCToPDF.SendToClient</see>.
+            </summary>
+      <remarks>
+            The default value is true.
+            </remarks>
+    </member>
+    <member name="P:EO.Pdf.Mvc.RenderAsPDFAttribute.ResultFileName">
+      <summary>
+            Gets or sets the default value for <see cref="P:EO.Pdf.Mvc.MVCToPDF.ResultFileName">MVCToPDF.PdfFileName</see>.
+            </summary>
+    </member>
+    <member name="P:EO.Pdf.Mvc.RenderAsPDFAttribute.ResultAsDownload">
+      <summary>
+            Gets or sets the default value for <see cref="P:EO.Pdf.Mvc.MVCToPDF.ResultAsDownload">MVCToPDF.ResultAsDownload</see></summary>
+      <remarks>
+            The default value is true.
+            </remarks>
+    </member>
+  </members>
+</doc>
