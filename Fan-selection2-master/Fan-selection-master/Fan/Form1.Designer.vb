@@ -451,6 +451,7 @@ Partial Class Form1
         Me.TextBox44 = New System.Windows.Forms.TextBox()
         Me.Label42 = New System.Windows.Forms.Label()
         Me.TabPage5 = New System.Windows.Forms.TabPage()
+        Me.Button12 = New System.Windows.Forms.Button()
         Me.GroupBox47 = New System.Windows.Forms.GroupBox()
         Me.RadioButton16 = New System.Windows.Forms.RadioButton()
         Me.RadioButton15 = New System.Windows.Forms.RadioButton()
@@ -478,7 +479,6 @@ Partial Class Form1
         Me.Label270 = New System.Windows.Forms.Label()
         Me.Label267 = New System.Windows.Forms.Label()
         Me.Label269 = New System.Windows.Forms.Label()
-        Me.Button12 = New System.Windows.Forms.Button()
         Me.Chart4 = New System.Windows.Forms.DataVisualization.Charting.Chart()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.GroupBox22 = New System.Windows.Forms.GroupBox()
@@ -2019,7 +2019,7 @@ Partial Class Form1
         Me.NumericUpDown37.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, CType((System.Drawing.FontStyle.Bold Or System.Drawing.FontStyle.Italic), System.Drawing.FontStyle), System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.NumericUpDown37.Increment = New Decimal(New Integer() {1, 0, 0, 65536})
         Me.NumericUpDown37.Location = New System.Drawing.Point(183, 59)
-        Me.NumericUpDown37.Maximum = New Decimal(New Integer() {600, 0, 0, 0})
+        Me.NumericUpDown37.Maximum = New Decimal(New Integer() {1700, 0, 0, 0})
         Me.NumericUpDown37.Name = "NumericUpDown37"
         Me.NumericUpDown37.Size = New System.Drawing.Size(77, 22)
         Me.NumericUpDown37.TabIndex = 81
@@ -3133,7 +3133,6 @@ Partial Class Form1
         Me.NumericUpDown76.Maximum = New Decimal(New Integer() {5000, 0, 0, 0})
         Me.NumericUpDown76.Minimum = New Decimal(New Integer() {1013, 0, 0, -2147483648})
         Me.NumericUpDown76.Name = "NumericUpDown76"
-        Me.NumericUpDown76.ReadOnly = True
         Me.NumericUpDown76.Size = New System.Drawing.Size(76, 22)
         Me.NumericUpDown76.TabIndex = 93
         Me.NumericUpDown76.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -4348,9 +4347,9 @@ Partial Class Form1
         '
         'Button23
         '
-        Me.Button23.Location = New System.Drawing.Point(642, 599)
+        Me.Button23.Location = New System.Drawing.Point(393, 587)
         Me.Button23.Name = "Button23"
-        Me.Button23.Size = New System.Drawing.Size(231, 43)
+        Me.Button23.Size = New System.Drawing.Size(301, 43)
         Me.Button23.TabIndex = 51
         Me.Button23.Text = "Print to Word"
         Me.Button23.UseVisualStyleBackColor = True
@@ -5549,12 +5548,13 @@ Partial Class Form1
         '
         'Button2
         '
-        Me.Button2.Location = New System.Drawing.Point(405, 599)
+        Me.Button2.Location = New System.Drawing.Point(787, 587)
         Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(231, 43)
+        Me.Button2.Size = New System.Drawing.Size(85, 43)
         Me.Button2.TabIndex = 28
         Me.Button2.Text = "Reken"
         Me.Button2.UseVisualStyleBackColor = True
+        Me.Button2.Visible = False
         '
         'Label49
         '
@@ -6043,6 +6043,7 @@ Partial Class Form1
         '
         'TabPage5
         '
+        Me.TabPage5.Controls.Add(Me.Button12)
         Me.TabPage5.Controls.Add(Me.GroupBox47)
         Me.TabPage5.Controls.Add(Me.GroupBox9)
         Me.TabPage5.Controls.Add(Me.PictureBox1)
@@ -6057,6 +6058,15 @@ Partial Class Form1
         Me.TabPage5.TabIndex = 4
         Me.TabPage5.Text = "As, lagers, torsie analyse"
         Me.TabPage5.UseVisualStyleBackColor = True
+        '
+        'Button12
+        '
+        Me.Button12.Location = New System.Drawing.Point(497, 558)
+        Me.Button12.Name = "Button12"
+        Me.Button12.Size = New System.Drawing.Size(187, 43)
+        Me.Button12.TabIndex = 56
+        Me.Button12.Text = "Print to Word"
+        Me.Button12.UseVisualStyleBackColor = True
         '
         'GroupBox47
         '
@@ -6198,7 +6208,6 @@ Partial Class Form1
         '
         'SplitContainer1.Panel2
         '
-        Me.SplitContainer1.Panel2.Controls.Add(Me.Button12)
         Me.SplitContainer1.Panel2.Controls.Add(Me.Chart4)
         Me.SplitContainer1.Size = New System.Drawing.Size(434, 616)
         Me.SplitContainer1.SplitterDistance = 230
@@ -6374,15 +6383,6 @@ Partial Class Form1
         Me.Label269.Size = New System.Drawing.Size(182, 16)
         Me.Label269.TabIndex = 46
         Me.Label269.Text = "Stijfheid as [N.m/rad] - [N.m/°]"
-        '
-        'Button12
-        '
-        Me.Button12.Location = New System.Drawing.Point(337, 352)
-        Me.Button12.Name = "Button12"
-        Me.Button12.Size = New System.Drawing.Size(94, 27)
-        Me.Button12.TabIndex = 56
-        Me.Button12.Text = "Save to Word"
-        Me.Button12.UseVisualStyleBackColor = True
         '
         'Chart4
         '
@@ -6704,7 +6704,7 @@ Partial Class Form1
         '
         'Button6
         '
-        Me.Button6.Location = New System.Drawing.Point(503, 561)
+        Me.Button6.Location = New System.Drawing.Point(338, 600)
         Me.Button6.Name = "Button6"
         Me.Button6.Size = New System.Drawing.Size(75, 23)
         Me.Button6.TabIndex = 2

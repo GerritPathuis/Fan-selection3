@@ -1,5 +1,5 @@
 ﻿Imports System.Text
-Imports System
+Imports System.IO
 Imports System.Configuration
 Imports System.Math
 Imports System.Collections.Generic
@@ -171,18 +171,21 @@ Public Class Form1
    "110; 1500; 315S; 1204; 70",
    "132; 1500; 315S; 1204; 70",
    "160; 1500; 315S; 1204; 70",
+   "185; 1500; 315S; 1204; 70",
    "200; 1500; 315M; 1315; 70",
+   "220; 1500; 355S; 1594; 80",
    "250; 1500; 355S; 1594; 80",
+   "280; 1500; 355S; 1594; 80",
    "315; 1500; 355SM; 1646; 80",
    "355; 1500; 355SM; 1646; 80",
    "400; 1500; 355M; 1751; 80",
    "450; 1500; 355M; 1751; 80",
    "500; 1500; 355M; 1751; 80",
-   "560; 1500; 400L; 1928; 85",
-   "630; 1500; 400L; 1928; 85",
-   "710; 1500; 400L; 1928; 85",
-   "800; 1500; 400L; 1928; 00",
-   "900; 1500; 400L; 1928; 00",
+   "560; 1500; 400L; 00; 85",
+   "630; 1500; 400L; 00; 85",
+   "710; 1500; 400L; 00; 85",
+   "800; 1500; 400L; 00; 00",
+   "900; 1500; 400L; 00; 00",
    "1000; 1500; Spec; 00; 00",
    "1100; 1500; Spec; 00; 00",
    "1250; 1500; Spec; 00; 00",
@@ -968,7 +971,7 @@ Public Class Form1
                 End Select
                 TextBox181.Text = Round(Power_total, 0).ToString               '[kW]
             Catch ex As Exception
-                MessageBox.Show(ex.Message)  ' Show the exception's message.
+                MessageBox.Show("Line 971, " & ex.Message)  ' Show the exception's message.
             End Try
         End If
     End Sub
@@ -1235,7 +1238,6 @@ Public Class Form1
         TextBox45.Text = Round(Bodem_gewicht, 1).ToString
         TextBox94.Text = Round(Voorplaat_gewicht, 1).ToString
 
-
         TextBox192.Text = Round(Waaier_as_gewicht, 0).ToString
         TextBox96.Text = Round(Waaier_as_gewicht, 1).ToString
         TextBox103.Text = Round(Voorplaat_keel * 1000, 0).ToString
@@ -1246,7 +1248,7 @@ Public Class Form1
         TextBox107.Text = Round(J3, 1).ToString
         TextBox387.Text = Round(J4, 1).ToString
         TextBox386.Text = Round(J5, 1).ToString
-        TextBox374.Text = Round(Waaier_gewicht, 1).ToString
+        TextBox374.Text = Round(Waaier_gewicht, 0).ToString
 
         If RadioButton37.Checked Then                       'Plaat schroep
 
@@ -2019,7 +2021,7 @@ Public Class Form1
         Dim oTable As Word.Table
         Dim oPara1, oPara2, oPara4 As Word.Paragraph
         Dim j As Integer
-        'Dim ufilename As String
+        Dim ufilename As String
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
@@ -2141,7 +2143,6 @@ Public Class Form1
         oTable.Rows.Item(1).Range.Font.Bold = True
         oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
 
-
         '------------------save Chart1 ---------------- 
         Scale_rules_applied(ComboBox1.SelectedIndex, NumericUpDown9.Value, NumericUpDown10.Value, NumericUpDown12.Value)
         draw_chart1(ComboBox1.SelectedIndex)
@@ -2188,18 +2189,13 @@ Public Class Form1
         oPara4.Range.InsertParagraphAfter()
 
         Try
-            'ufilename = "C:\temp\" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & "_Fan_selection.docx"
-            'MessageBox.Show("File saved at " & ufilename)
-            'oDoc.SaveAs(ufilename)
-            ' oDoc.Close()
+            ufilename = "N:\Engineering\VBasic\Rapport_copy\Fan_report_" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & ".docx"
+            If Directory.Exists("N:\Engineering\VBasic\Rapport_copy") Then
+                oWord.ActiveDocument.SaveAs(ufilename)
+                'oDoc.SaveAs(ufilename)
+            End If
         Catch ex As Exception
-            MessageBox.Show(ex.Message)  ' Show the exception's message.
-            'Finally
-            '    'quit Word
-            '    If Not IsNothing(oWord) Then
-            '        oWord.Quit()
-            '        oWord = Nothing
-            '    End If
+            MessageBox.Show(ex.Message & " Problem storing file to c:\ ")  ' Show the exception's message.
         End Try
 
     End Sub
@@ -3587,6 +3583,7 @@ Public Class Form1
         Dim oDoc As Word.Document
         Dim oTable As Word.Table
         Dim oPara1, oPara2, oPara4 As Word.Paragraph
+        Dim row As Integer
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
@@ -3638,94 +3635,96 @@ Public Class Form1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
         oTable.Rows.Item(1).Range.Font.Bold = True
-
-        oTable.Cell(1, 1).Range.Text = "Equipment Data"
-        oTable.Cell(1, 2).Range.Text = ""
-        oTable.Cell(1, 3).Range.Text = ""
-
-        oTable.Cell(2, 1).Range.Text = "Inertia impeller"
-        oTable.Cell(2, 2).Range.Text = NumericUpDown45.Value
-        oTable.Cell(2, 3).Range.Text = "[kg.m2]"
-
-        oTable.Cell(3, 1).Range.Text = "Inertia coupling"
-        oTable.Cell(3, 2).Range.Text = NumericUpDown43.Value
-        oTable.Cell(3, 3).Range.Text = "[kg.m2]"
-
-        oTable.Cell(4, 1).Range.Text = "Inertia motor"
-        oTable.Cell(4, 2).Range.Text = NumericUpDown46.Value
-        oTable.Cell(4, 3).Range.Text = "[kg.m2]"
-
-        oTable.Cell(5, 1).Range.Text = "Shaft stiffness"
-        oTable.Cell(5, 2).Range.Text = TextBox259.Text
-        oTable.Cell(5, 3).Range.Text = "[N.m/rad]"
-        oTable.Cell(5, 4).Range.Text = TextBox258.Text
-        oTable.Cell(5, 5).Range.Text = "[k.N.m/°]"
-
-        oTable.Cell(6, 1).Range.Text = "Coupling stiffness"
-        oTable.Cell(6, 2).Range.Text = NumericUpDown44.Value
-        oTable.Cell(6, 3).Range.Text = "[N.m/rad]"
-        oTable.Cell(6, 4).Range.Text = TextBox257.Text
-        oTable.Cell(6, 5).Range.Text = "[k.N.m/°]"
+        row = 1
+        oTable.Cell(row, 1).Range.Text = "Equipment Data"
+        oTable.Cell(row, 2).Range.Text = ""
+        oTable.Cell(row, 3).Range.Text = ""
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Inertia impeller"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown45.Value
+        oTable.Cell(row, 3).Range.Text = "[kg.m2]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Inertia coupling"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown43.Value
+        oTable.Cell(row, 3).Range.Text = "[kg.m2]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Inertia motor"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown46.Value
+        oTable.Cell(row, 3).Range.Text = "[kg.m2]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Shaft stiffness"
+        oTable.Cell(row, 2).Range.Text = TextBox259.Text
+        oTable.Cell(row, 3).Range.Text = "[N.m/rad]"
+        oTable.Cell(row, 4).Range.Text = TextBox258.Text
+        oTable.Cell(row, 5).Range.Text = "[k.N.m/°]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Coupling stiffness"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown44.Value
+        oTable.Cell(row, 3).Range.Text = "[N.m/rad]"
+        oTable.Cell(row, 4).Range.Text = TextBox257.Text
+        oTable.Cell(row, 5).Range.Text = "[k.N.m/°]"
 
         '---- Shaft length-----
-        oTable.Cell(7, 1).Range.Text = "Overhang impeller"
-        oTable.Cell(7, 2).Range.Text = NumericUpDown22.Value
-        oTable.Cell(7, 3).Range.Text = "[mm]"
-
-        oTable.Cell(8, 1).Range.Text = "Distance between bearings"
-        oTable.Cell(8, 2).Range.Text = NumericUpDown23.Value
-        oTable.Cell(8, 3).Range.Text = "[mm]"
-
-        oTable.Cell(9, 1).Range.Text = "Overhang coupling"
-        oTable.Cell(9, 2).Range.Text = NumericUpDown24.Value
-        oTable.Cell(9, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Overhang impeller"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown22.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Distance between bearings"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown23.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Overhang coupling"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown24.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
 
         '---- Shaft diameter-----
-        oTable.Cell(10, 1).Range.Text = "Diameter impeller shaft"
-        oTable.Cell(10, 2).Range.Text = NumericUpDown25.Value
-        oTable.Cell(10, 3).Range.Text = "[mm]"
-
-        oTable.Cell(11, 1).Range.Text = "Diameter shaft bearings"
-        oTable.Cell(11, 2).Range.Text = NumericUpDown26.Value
-        oTable.Cell(11, 3).Range.Text = "[mm]"
-
-        oTable.Cell(12, 1).Range.Text = "Diameter shaft coupling"
-        oTable.Cell(12, 2).Range.Text = NumericUpDown27.Value
-        oTable.Cell(12, 3).Range.Text = "[mm]"
-
-        oTable.Cell(13, 1).Range.Text = "Weight impeller"
-        oTable.Cell(13, 2).Range.Text = TextBox374.Text
-        oTable.Cell(13, 3).Range.Text = "[kg]"
-
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Diameter impeller shaft"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown25.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Diameter shaft bearings"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown26.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Diameter shaft coupling"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown27.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Weight impeller"
+        oTable.Cell(row, 2).Range.Text = TextBox374.Text
+        oTable.Cell(row, 3).Range.Text = "[kg]"
+        row += 1
 
         '---- results torsie analyse---------
-        oTable.Cell(14, 1).Range.Text = "Drive string 1st natural speed"
-        oTable.Cell(14, 2).Range.Text = TextBox84.Text
-        oTable.Cell(14, 3).Range.Text = "[rpm]"
+        oTable.Cell(row, 1).Range.Text = "Drive string 1st natural speed"
+        oTable.Cell(row, 2).Range.Text = TextBox84.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
 
         '---- results bending analyse---------
-        oTable.Cell(15, 1).Range.Text = "Overhung Shaft 1st natural speed"
-        oTable.Cell(15, 2).Range.Text = TextBox47.Text
-        oTable.Cell(15, 3).Range.Text = "[rpm]"
+        oTable.Cell(row, 1).Range.Text = "Overhung Shaft 1st natural speed"
+        oTable.Cell(row, 2).Range.Text = TextBox47.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
 
         '---- results bending analyse---------
-        oTable.Cell(16, 1).Range.Text = "Shaft between bearings 1st natural speed"
-        oTable.Cell(16, 2).Range.Text = TextBox377.Text
-        oTable.Cell(16, 3).Range.Text = "[rpm]"
+        oTable.Cell(row, 1).Range.Text = "Shaft between bearings 1st natural speed"
+        oTable.Cell(row, 2).Range.Text = TextBox377.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
 
         '---- results Impeller analyse---------
-        oTable.Cell(17, 1).Range.Text = "Impeller back disk 1st natural speed"
-        oTable.Cell(17, 2).Range.Text = TextBox211.Text
-        oTable.Cell(17, 3).Range.Text = "[rpm]"
-        oTable.Cell(17, 4).Range.Text = NumericUpDown17.Value
-        oTable.Cell(17, 5).Range.Text = "[mm]"
+        oTable.Cell(row, 1).Range.Text = "Impeller back disk 1st natural speed"
+        oTable.Cell(row, 2).Range.Text = TextBox211.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
+        oTable.Cell(row, 4).Range.Text = NumericUpDown17.Value
+        oTable.Cell(row, 5).Range.Text = "[mm]"
 
         '---- results Impeller analyse---------
-        oTable.Cell(18, 1).Range.Text = "Impeller front disk 1st natural speed"
-        oTable.Cell(18, 2).Range.Text = TextBox371.Text
-        oTable.Cell(18, 3).Range.Text = "[rpm]"
-        oTable.Cell(18, 4).Range.Text = NumericUpDown31.Value
-        oTable.Cell(18, 5).Range.Text = "[mm]"
+        oTable.Cell(row, 1).Range.Text = "Impeller front disk 1st natural speed"
+        oTable.Cell(row, 2).Range.Text = TextBox371.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
+        oTable.Cell(row, 4).Range.Text = NumericUpDown31.Value
+        oTable.Cell(row, 5).Range.Text = "[mm]"
 
         oTable.Columns(1).Width = oWord.InchesToPoints(2.7)   'Change width of columns 1 & 2.
         oTable.Columns(2).Width = oWord.InchesToPoints(0.8)
@@ -3745,8 +3744,6 @@ Public Class Form1
         oPara4.Range.InsertParagraphAfter()
 
     End Sub
-
-
     'Bearing calculation
     Private Sub Button13_Click(sender As Object, e As EventArgs) Handles Button13.Click, RadioButton24.CheckedChanged, RadioButton22.CheckedChanged, RadioButton19.CheckedChanged, RadioButton17.Click, NumericUpDown69.ValueChanged, TabPage13.Enter, NumericUpDown62.ValueChanged, NumericUpDown61.ValueChanged, ComboBox8.SelectedIndexChanged, NumericUpDown63.ValueChanged, NumericUpDown59.ValueChanged, RadioButton23.CheckedChanged, RadioButton18.CheckedChanged, NumericUpDown57.ValueChanged, RadioButton25.Click, RadioButton26.CheckedChanged, RadioButton27.CheckedChanged, RadioButton28.CheckedChanged
         Dim plain_bearing_area, plain_stress_no1, plain_stress_no2, plain_sliding_speed As Double
@@ -4118,14 +4115,13 @@ Public Class Form1
         TextBox287.Text = Round(Total, 2).ToString
     End Sub
 
-    Private Sub TextBox380_TextChanged(sender As Object, e As EventArgs) Handles TextBox380.TextChanged
-
-    End Sub
     Private Sub Button23_Click(sender As Object, e As EventArgs) Handles Button23.Click
         Dim oWord As Word.Application
         Dim oDoc As Word.Document
         Dim oTable As Word.Table
         Dim oPara1, oPara2 As Word.Paragraph
+        Dim ufilename As String
+        Dim row As Integer
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
@@ -4150,7 +4146,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 6, 2)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 4, 2)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
@@ -4178,132 +4174,141 @@ Public Class Form1
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
-        oTable.Rows.Item(1).Range.Font.Bold = True
-
-
-        oTable.Cell(1, 1).Range.Text = "Materiaal keuze"
-
-        oTable.Cell(2, 1).Range.Text = "~ Materiaal waaier"
-        oTable.Cell(2, 2).Range.Text = ComboBox3.Text
-
+        row = 1
+        oTable.Rows.Item(row).Range.Font.Bold = True
+        oTable.Cell(row, 1).Range.Text = "Materiaal keuze"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Materiaal waaier"
+        oTable.Cell(row, 2).Range.Text = ComboBox3.Text
+        row += 1
         oTable.Cell(3, 1).Range.Text = "~ Waaier temperatuur"
         oTable.Cell(3, 2).Range.Text = NumericUpDown18.Value
         oTable.Cell(3, 3).Range.Text = "[°C]"
-
-        oTable.Cell(4, 1).Range.Text = "Max. toegestane treksterkte"
-        oTable.Cell(4, 2).Range.Text = TextBox40.Text
-        oTable.Cell(4, 3).Range.Text = "[N/mm2]"
-
-
-        oTable.Rows.Item(6).Range.Font.Bold = True
-        oTable.Cell(6, 1).Range.Text = "Aandrijving"
-
-        oTable.Cell(7, 1).Range.Text = "~ Toerental"
-        oTable.Cell(7, 2).Range.Text = NumericUpDown19.Value
-        oTable.Cell(7, 3).Range.Text = "[rpm]"
-
-        '---- -----
-        oTable.Rows.Item(9).Range.Font.Bold = True
-        oTable.Cell(9, 1).Range.Text = "Spanning plaat-schoepen (ingeklemd)"
-
-        oTable.Cell(10, 1).Range.Text = "~ Dikte schoep"
-        oTable.Cell(10, 2).Range.Text = NumericUpDown20.Value
-        oTable.Cell(10, 3).Range.Text = "[mm]"
-
-        oTable.Cell(11, 1).Range.Text = "Berekende spanning"
-        oTable.Cell(11, 2).Range.Text = TextBox43.Text
-        oTable.Cell(11, 3).Range.Text = "[N/mm2]"
-
-        '---- -----
-        oTable.Rows.Item(13).Range.Font.Bold = True
-        oTable.Cell(13, 1).Range.Text = "Waaier afmetingen"
-
-        oTable.Cell(14, 1).Range.Text = "~ Diameter waaier"
-        oTable.Cell(14, 2).Range.Text = NumericUpDown21.Value
-        oTable.Cell(14, 3).Range.Text = "[mm]"
-
-        oTable.Cell(15, 1).Range.Text = "~ Dikte bodemschijf"
-        oTable.Cell(15, 2).Range.Text = NumericUpDown17.Value
-        oTable.Cell(15, 3).Range.Text = "[mm]"
-
-        oTable.Cell(16, 1).Range.Text = "~ Dikte voorplaat"
-        oTable.Cell(16, 2).Range.Text = NumericUpDown31.Value
-        oTable.Cell(16, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Max. toegestane treksterkte"
+        oTable.Cell(row, 2).Range.Text = TextBox40.Text
+        oTable.Cell(row, 3).Range.Text = "[N/mm2]"
+        row += 1
+        oTable.Rows.Item(row).Range.Font.Bold = True
+        oTable.Cell(row, 1).Range.Text = "Aandrijving"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Toerental"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown19.Value
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
+        row += 1
+        oTable.Rows.Item(row).Range.Font.Bold = True
+        oTable.Cell(row, 1).Range.Text = "Spanning plaat-schoepen (ingeklemd)"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Dikte schoep"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown20.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Berekende spanning"
+        oTable.Cell(row, 2).Range.Text = TextBox43.Text
+        oTable.Cell(row, 3).Range.Text = "[N/mm2]"
+        row += 1
+        oTable.Rows.Item(row).Range.Font.Bold = True
+        oTable.Cell(row, 1).Range.Text = "Waaier afmetingen"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Diameter waaier"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown21.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Dikte bodemschijf"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown17.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Dikte voorplaat"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown31.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
 
         '---- naaf afmetingen---------
-        oTable.Cell(17, 1).Range.Text = "~ Naaf diameter D"
-        oTable.Cell(17, 2).Range.Text = NumericUpDown28.Value
-        oTable.Cell(17, 3).Range.Text = "[mm]"
-
-        oTable.Cell(18, 1).Range.Text = "~ Naaf dikte"
-        oTable.Cell(18, 2).Range.Text = NumericUpDown29.Value
-        oTable.Cell(18, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Naaf diameter D"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown28.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Naaf dikte"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown29.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
 
         '---- gewichten---------
-        oTable.Cell(19, 1).Range.Text = "~ Koppeling helft/pulley"
-        oTable.Cell(19, 2).Range.Text = NumericUpDown30.Value
-        oTable.Cell(19, 3).Range.Text = "[kg]"
-
-        oTable.Cell(20, 1).Range.Text = "~ Las toevoegmateriaal"
-        oTable.Cell(20, 2).Range.Text = NumericUpDown11.Value
-        oTable.Cell(20, 3).Range.Text = "[kg]"
-
-        oTable.Cell(21, 1).Range.Text = "Totaal gewicht waaier"
-        oTable.Cell(21, 2).Range.Text = TextBox192.Text
-        oTable.Cell(21, 3).Range.Text = "[kg]"
-
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Koppeling helft/pulley"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown30.Value
+        oTable.Cell(row, 3).Range.Text = "[kg]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Las toevoegmateriaal"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown11.Value
+        oTable.Cell(row, 3).Range.Text = "[kg]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Totaal gewicht waaier met as"
+        oTable.Cell(row, 2).Range.Text = TextBox192.Text
+        oTable.Cell(row, 3).Range.Text = "[kg]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Gewicht waaier tbv Campbell berekening"
+        oTable.Cell(row, 2).Range.Text = TextBox374.Text
+        oTable.Cell(row, 3).Range.Text = "[kg]"
+        row += 2
         oTable.Rows.Item(23).Range.Font.Bold = True
-        oTable.Cell(23, 1).Range.Text = "Spanning waaier bodemschijf"
-
-        oTable.Cell(24, 1).Range.Text = "Berekende spanning"
-        oTable.Cell(24, 2).Range.Text = TextBox32.Text
-        oTable.Cell(24, 3).Range.Text = "[N/mm2]"
-
+        oTable.Cell(row, 1).Range.Text = "Spanning waaier bodemschijf"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Berekende spanning"
+        oTable.Cell(row, 2).Range.Text = TextBox32.Text
+        oTable.Cell(row, 3).Range.Text = "[N/mm2]"
+        row += 2
         oTable.Rows.Item(26).Range.Font.Bold = True
-        oTable.Cell(26, 1).Range.Text = "Kritisch toerental as enkelzijdig gelagerd"
-
-        oTable.Cell(27, 1).Range.Text = "Eigenfrequentie bij 15% safety"
-        oTable.Cell(27, 2).Range.Text = TextBox47.Text
-        oTable.Cell(27, 3).Range.Text = "[rpm]"
-
+        oTable.Cell(row, 1).Range.Text = "Kritisch toerental as enkelzijdig gelagerd"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Eigenfrequentie bij 15% safety"
+        oTable.Cell(row, 2).Range.Text = TextBox47.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
+        row += 2
         oTable.Rows.Item(29).Range.Font.Bold = True
-        oTable.Cell(29, 1).Range.Text = "Bodemschijf natural frequency"
-
-        oTable.Cell(30, 1).Range.Text = "1ste Eigenfrequentie staal"
-        oTable.Cell(30, 2).Range.Text = TextBox211.Text
-        oTable.Cell(30, 3).Range.Text = "[rpm]"
-
+        oTable.Cell(row, 1).Range.Text = "Bodemschijf natural frequency"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "1ste Eigenfrequentie staal"
+        oTable.Cell(row, 2).Range.Text = TextBox211.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
+        row += 2
         oTable.Rows.Item(32).Range.Font.Bold = True
-        oTable.Cell(32, 1).Range.Text = "Spanning airfoil (T33, T34)"
-
-        oTable.Cell(33, 1).Range.Text = "~ Airfoil hoogte uitwendig"
-        oTable.Cell(33, 2).Range.Text = NumericUpDown2.Value
-        oTable.Cell(33, 3).Range.Text = "[mm]"
-
-        oTable.Cell(34, 1).Range.Text = "~ Airfoil skin plaatdikte"
-        oTable.Cell(34, 2).Range.Text = NumericUpDown39.Value
-        oTable.Cell(34, 3).Range.Text = "[mm]"
-
-        oTable.Cell(35, 1).Range.Text = "~ Rib afstand cl-cl"
-        oTable.Cell(35, 2).Range.Text = TextBox383.Text
-        oTable.Cell(35, 3).Range.Text = "[mm]"
-
-        oTable.Cell(36, 1).Range.Text = "~ Rib plaatdikte"
-        oTable.Cell(36, 2).Range.Text = NumericUpDown41.Value
-        oTable.Cell(36, 3).Range.Text = "[mm]"
-
-        oTable.Cell(37, 1).Range.Text = "Box tau+sigma"
-        oTable.Cell(37, 2).Range.Text = TextBox67.Text
-        oTable.Cell(37, 3).Range.Text = "[N/mm2]"
-
-        oTable.Cell(38, 1).Range.Text = "Skin tau+sigma"
-        oTable.Cell(38, 2).Range.Text = TextBox73.Text
-        oTable.Cell(38, 3).Range.Text = "[N/mm2]"
+        oTable.Cell(row, 1).Range.Text = "Spanning airfoil (T33, T34)"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Airfoil hoogte uitwendig"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown2.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Airfoil skin plaatdikte"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown39.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Rib afstand cl-cl"
+        oTable.Cell(row, 2).Range.Text = TextBox383.Text
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "~ Rib plaatdikte"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown41.Value
+        oTable.Cell(row, 3).Range.Text = "[mm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Box tau+sigma"
+        oTable.Cell(row, 2).Range.Text = TextBox67.Text
+        oTable.Cell(row, 3).Range.Text = "[N/mm2]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Skin tau+sigma"
+        oTable.Cell(row, 2).Range.Text = TextBox73.Text
+        oTable.Cell(row, 3).Range.Text = "[N/mm2]"
 
         oTable.Columns(1).Width = oWord.InchesToPoints(3.1)   'Change width of columns 1 & 2.
         oTable.Columns(2).Width = oWord.InchesToPoints(1.3)
         oTable.Columns(3).Width = oWord.InchesToPoints(0.8)
         oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
+
+        ufilename = "N:\Engineering\VBasic\Rapport_copy\Fan_stress_report_" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & ".docx"
+
+        If Directory.Exists("N:\Engineering\VBasic\Rapport_copy") Then
+            GroupBox12.Text = "File saved at " & ufilename
+            oWord.ActiveDocument.SaveAs(ufilename)
+        End If
     End Sub
 
 
