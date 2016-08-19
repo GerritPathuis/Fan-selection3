@@ -490,6 +490,36 @@ Public Class Form1
         End If
     End Sub
 
+    Private Sub get_model_name()
+        Dim tn As String
+        Dim temp As Integer
+        '--------------------- model name-----------
+        tn = String.Empty
+        If RadioButton6.Checked Then
+            tn = "2"                        'Double suction             
+            NumericUpDown40.Value = 1       'Enkele waaier
+        End If
+
+        If dp_static_inletbox_VC <= 10 Then
+            tn &= "LD"                                 'Low pressure
+        Else
+            If dp_static_inletbox_VC > 10 And dp_static_inletbox_VC <= 40 Then
+                tn += "MD"                             'Medium pressure           
+            Else
+                If dp_static_inletbox_VC > 40 Then
+                    tn &= "HD"                         'High pressure
+                End If
+            End If
+        End If
+        If NumericUpDown40.Value > 1 Then
+            tn &= NumericUpDown40.Value.ToString
+        End If
+        temp = Round(NumericUpDown33.Value / 5) * 5     'Diameter waaier afronden op 5 mm
+        tn &= "-" & TextBox159.Text & "/" & temp.ToString & "/" & Tschets(ComboBox1.SelectedIndex).Tname
+
+        Label1.Text = tn
+    End Sub
+
     Private Sub Selectie_1()
 
         Dim nrq As Integer
@@ -501,35 +531,22 @@ Public Class Form1
 
         Dim Ttype As Int16                  'Waaier type
         Dim diam1, diam2, nn1, nn2, roo1, roo2 As Double
-        Dim Power_total, flow, temp As Double
+        Dim Power_total, flow As Double
 
         '0-Diameter,1-Toerental,2-Dichtheid,3-Zuigmond diameter,4-Persmond lengte,5-Breedte huis,6-Lengte spiraal,7 breedte pers,8 lengte pers,9-c,10-d,11-e,
         '12-Schoeplengte,13-Aantal schoepen,14-Breedte inwendig,15-Breedte uitwendig,16-Keeldiameter,17-Inw. dia. schoepen,18-Intrede hoek,19-Uittrede hoek
 
-        TextBox12.Text = NumericUpDown58.Value.ToString
-
-        '--------------------- model name-----------
-        Label1.Text = ""
-        If RadioButton6.Checked Then Label1.Text = "2"      'Double suction
-
-        If dp_static_inletbox_VC <= 10 Then
-            Label1.Text += "LD "                             'Low pressure
-        Else
-            If dp_static_inletbox_VC > 10 And dp_static_inletbox_VC <= 40 Then
-                Label1.Text += "MD "                         'Medium pressure
-            Else
-                If dp_static_inletbox_VC > 40 Then
-                    Label1.Text += "HD "                     'High pressure
-                End If
-            End If
-        End If
-
-
         nrq = ComboBox7.SelectedIndex   'Prevent out of bounds error
         If nrq >= 0 And nrq <= 30 Then
             Try
-                temp = Round(NumericUpDown33.Value / 5) * 5     'Diameter waaier afronden op 5 mm
-                Label1.Text += TextBox159.Text & "/" & temp.ToString & "/" & Tschets(ComboBox1.SelectedIndex).Tname
+                TextBox12.Text = NumericUpDown58.Value.ToString 'Phi van omloop 2
+
+                '--------- Double suction is enkele waaier -------------
+                If RadioButton6.Checked Then        'Double suction 
+                    NumericUpDown40.Value = 1       'Enkele waaier
+                End If
+
+                get_model_name()
 
                 '---------------- Debiet in [kgs/hr]------------------
                 If RadioButton6.Checked Then
@@ -936,12 +953,14 @@ Public Class Form1
                 TextBox279.Text = Round(cond(3).Ro1, 3).ToString                '[kg/Am3] density fan in
 
                 '-------------------------- Aantal trappen ----------------------
+                Label383.Text = NumericUpDown40.Value
+                Label384.Text = NumericUpDown40.Value
                 Select Case True
-                    Case RadioButton12.Checked              '1 trap
+                    Case NumericUpDown40.Value = 1      '1 trap
                         GroupBox18.Visible = False
                         GroupBox40.Visible = False
                         GroupBox46.Visible = False
-                    Case RadioButton13.Checked              '2 traps
+                    Case NumericUpDown40.Value = 2               '2 traps
                         GroupBox18.Visible = True
                         GroupBox40.Visible = True
                         GroupBox46.Visible = True
@@ -954,7 +973,7 @@ Public Class Form1
                         TextBox277.Text = Round((cond(2).Pt2) / 100, 0).ToString                    '[mbar] gauge fan total
                         TextBox64.Text = Round(cond(2).T2, 0)
                         TextBox278.Text = Round((cond(2).Ro2), 3).ToString                          '[kg/Am3] density out
-                    Case RadioButton14.Checked              '3 traps
+                    Case NumericUpDown40.Value = 3                 '3 traps
                         GroupBox18.Visible = True
                         GroupBox40.Visible = True
                         GroupBox46.Visible = True
@@ -997,7 +1016,7 @@ Public Class Form1
         Dim sigma_schoep, sigma_bodemplaat As Double
         Dim V_omtrek, n_actual As Double
         Dim Voorplaat_keel, inw_schoep_dia, gem_schoep_dia As Double
-        Dim J1, J2, J3, J4, J5, J_naaf, J_tot, j_as As Double
+        Dim J1, J2, J3, J4, J5, J_naaf, J_tot, j_as, J_Campbell As Double
         Dim dia_naaf, gewicht_naaf, gewicht_as As Double
         Dim length_naaf, gewicht_pulley As Double
         Dim sg_staal As Double
@@ -1081,21 +1100,22 @@ Public Class Form1
 
         '-------------- waaier en waaier-as gewicht------------------------------
         If RadioButton37.Checked Then   'Plaat schoepen
-            Waaier_as_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
-            Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_naaf + las_gewicht    'Gewicht tbv N_krit
+            Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + las_gewicht    'Gewicht tbv N_krit
+            Waaier_gewicht *= NumericUpDown40.Value             'Aantal waaiers
+            Waaier_as_gewicht = Waaier_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley     'totaal gewicht
             If RadioButton6.Checked Then                'Dubbelzijdige aanzuiging
-                Waaier_as_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
                 Waaier_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
+                Waaier_as_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
             End If
         Else                            'Airfoil schoepen
-            Waaier_as_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
-            Waaier_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + gewicht_naaf + las_gewicht     'Gewicht tbv N_krit
+            Waaier_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + las_gewicht     'Gewicht tbv N_krit
+            Waaier_gewicht *= NumericUpDown40.Value                                             'Aantal waaiers
+            Waaier_as_gewicht = Waaier_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
             If RadioButton6.Checked Then                'Dubbelzijdige aanzuiging
                 Waaier_as_gewicht += airf_schoepen_gewicht + Voorplaat_gewicht
                 Waaier_gewicht += airf_schoepen_gewicht + Voorplaat_gewicht
             End If
         End If
-
 
         '--------max toerental (beide zijden ingeklemd)-----------
         maxrpm = 0.32 * Sqrt(sigma_allowed * Sch_dik / (sg_staal * Waaier_dia * Sch_breed ^ 2 * Cos(Sch_hoek * PI / 180)))
@@ -1170,7 +1190,6 @@ Public Class Form1
         airf_skin_hh = Sqrt(airf_skin_sigma_bend ^ 2 + 3 * airf_skin_tau ^ 2)       '[N/mm2]
         TextBox73.Text = Round(airf_skin_hh, 0).ToString                            '[N/mm2]
 
-
         '----------------------------------------------------------------------------------------------
         '------------------------- Traagheid (0.5 x m x r2) -------------------------------------------
         '----------------------------------------------------------------------------------------------
@@ -1190,16 +1209,20 @@ Public Class Form1
         If RadioButton5.Checked Then                'Enkelzijdige aanzuiging
             GroupBox20.Text = "Enkelzijdige waaier afmetingen"
             If RadioButton37.Checked Then   'Plaat schoep
-                J_tot = J1 + J2 + J3 + J4 + J_naaf + j_as
+                J_Campbell = (J1 + J2 + J3 + J4) * NumericUpDown40.Value
+                J_tot = J_Campbell + J_naaf + j_as
             Else                            'Air foil
-                J_tot = J1 + J2 + J3 + J5 + J_naaf + j_as
+                J_Campbell = (J1 + J2 + J3 + J5) * NumericUpDown40.Value
+                J_tot = J_Campbell + J_naaf + j_as
             End If
         Else                                         'Dubbelzijdige aanzuiging
             GroupBox20.Text = "Dubbelzijdige waaier afmetingen"
             If RadioButton37.Checked Then   'Plaat schoep
-                J_tot = J1 + (J2 * 2) + J3 + (J4 * 2) + J_naaf + j_as
+                J_Campbell = J1 + (J2 * 2) + J3 + (J4 * 2)
+                J_tot = J_Campbell + J_naaf + j_as
             Else
-                J_tot = J1 + (J2 * 2) + J3 + (J5 * 2) + J_naaf + j_as
+                J_Campbell = J1 + (J2 * 2) + J3 + (J5 * 2)
+                J_tot = J_Campbell + J_naaf + j_as
             End If
         End If
 
@@ -1251,7 +1274,6 @@ Public Class Form1
         TextBox374.Text = Round(Waaier_gewicht, 0).ToString
 
         If RadioButton37.Checked Then                       'Plaat schroep
-
             TextBox95.Text = Round(Plaat_schoepen_gewicht, 1).ToString
             TextBox108.Text = Round(J4, 1).ToString
         Else                                                'Air foil
@@ -1261,6 +1283,8 @@ Public Class Form1
 
         TextBox92.Text = Round(J_naaf, 2).ToString          'Massa traagheid (0.5*M*R^2)
         TextBox109.Text = Round(J_tot, 1).ToString          'Massa traagheid Totaal
+        TextBox392.Text = Round(J_Campbell, 1).ToString     'Massa traagheid waaiers tbv Campbell
+
         NumericUpDown45.Value = Round(J_tot, 1).ToString
 
         '-------------- check airfoil stress safety-----------------------
@@ -2046,7 +2070,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 6, 3)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 5, 3)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 11
         oTable.Range.Font.Bold = False
@@ -2071,13 +2095,13 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a 20 x 10 table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 25, 10)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 27, 10)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
         oTable.Rows.Item(1).Range.Font.Bold = True
 
-        For j = 0 To 24 'Rows
+        For j = 0 To 26 'Rows
             oTable.Cell(j + 1, 1).Range.Text = case_x_conditions(j, 10)     'Write all variables
             oTable.Cell(j + 1, 2).Range.Text = case_x_conditions(j, 11)     'Write all units
             oTable.Cell(j + 1, 3).Range.Text = case_x_conditions(j, 1)      'Case 1
@@ -2329,21 +2353,21 @@ Public Class Form1
                         calc_loop_loss(cond(6))                 'Bereken de omloop verliezen (niet echt nodig)
 
                         Select Case True
-                            Case RadioButton9.Checked      '1 traps
+                            Case NumericUpDown40.Value = 1      '1 traps
                                 Tschets(ty).TFlow_scaled(hh) = cond(4).Q1                                       '[Am3/hr]
                                 Tschets(ty).TPtot_scaled(hh) = Round((cond(4).Pt2 - cond(4).Pt1) / 100, 4)      '[mbar] dP fan total
                                 Tschets(ty).TPstat_scaled(hh) = Round((cond(4).Ps2 - cond(4).Ps1) / 100, 4)     '[mbar] dP fan static
                                 Tschets(ty).Tverm_scaled(hh) = Round(cond(4).Power, 4)                          '[kW]
                                 Tschets(ty).Teff_scaled(hh) = Round((100 * cond(4).delta_pt * cond(4).Q1 / (Tschets(ty).Tverm_scaled(hh) * 1000)), 4)
 
-                            Case RadioButton10.Checked      '2 traps
+                            Case NumericUpDown40.Value = 2       '2 traps
                                 Tschets(ty).TFlow_scaled(hh) = cond(4).Q1                                        '[Am3/hr]
                                 Tschets(ty).TPtot_scaled(hh) = Round((cond(5).Pt2 - cond(4).Pt1) / 100, 4)       '[mbar] dP fan total
                                 Tschets(ty).TPstat_scaled(hh) = Round((cond(5).Ps2 - cond(4).Ps1) / 100, 4)      '[mbar] dP fan static
                                 Tschets(ty).Tverm_scaled(hh) = Round(cond(4).Power + cond(5).Power, 4)           '[kW] waaier 1+2
                                 Tschets(ty).Teff_scaled(hh) = Round((100 * cond(5).delta_pt * cond(5).Q1 / (Tschets(ty).Tverm_scaled(hh) * 1000)), 4)
 
-                            Case RadioButton11.Checked   '3 traps
+                            Case NumericUpDown40.Value = 3     '3 traps
                                 Tschets(ty).TFlow_scaled(hh) = cond(4).Q1                                               '[Am3/hr]
                                 Tschets(ty).TPtot_scaled(hh) = Round((cond(6).Pt2 - cond(4).Pt1) / 100, 4)              '[mbar] dP fan total
                                 Tschets(ty).TPstat_scaled(hh) = Round((cond(6).Ps2 - cond(4).Ps1) / 100, 4)             '[mbar] dP fan static
@@ -2834,13 +2858,15 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, RadioButton14.CheckedChanged, RadioButton13.CheckedChanged, RadioButton12.CheckedChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged, NumericUpDown37.ValueChanged
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click, NumericUpDown8.ValueChanged, NumericUpDown5.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown3.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, ComboBox1.SelectedIndexChanged, RadioButton4.CheckedChanged, RadioButton3.CheckedChanged, CheckBox4.CheckedChanged, NumericUpDown33.ValueChanged, ComboBox7.SelectedIndexChanged, NumericUpDown58.ValueChanged, NumericUpDown76.ValueChanged, RadioButton6.CheckedChanged, CheckBox15.CheckedChanged, CheckBox1.CheckedChanged, NumericUpDown37.ValueChanged, NumericUpDown40.ValueChanged
         Update_selectie()
         If CheckBox1.Checked Or CheckBox15.Checked Then Update_selectie()   'Required for pressure loss inlet box and IVC
     End Sub
     Private Sub Update_selectie()
 
         dp_static_inletbox_VC = NumericUpDown37.Value               'Required dp static pressure
+
+
         If CheckBox1.Checked Then
             dp_static_inletbox_VC += Convert.ToDouble(TextBox391.Text) 'Inlet box pressure loss compensate
             TextBox388.Text = TextBox391.Text
@@ -3363,7 +3389,7 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click, CheckBox6.CheckedChanged, CheckBox3.CheckedChanged, CheckBox2.CheckedChanged, TabPage3.Enter, NumericUpDown9.ValueChanged, NumericUpDown10.ValueChanged, RadioButton9.CheckedChanged, RadioButton11.CheckedChanged, RadioButton10.CheckedChanged, CheckBox7.CheckedChanged, CheckBox8.CheckedChanged, CheckBox10.CheckedChanged, CheckBox13.CheckedChanged, CheckBox14.CheckedChanged
+    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click, CheckBox6.CheckedChanged, CheckBox3.CheckedChanged, CheckBox2.CheckedChanged, TabPage3.Enter, NumericUpDown9.ValueChanged, NumericUpDown10.ValueChanged, CheckBox7.CheckedChanged, CheckBox8.CheckedChanged, CheckBox10.CheckedChanged, CheckBox13.CheckedChanged, CheckBox14.CheckedChanged
         NumericUpDown33.Value = NumericUpDown9.Value
         If NumericUpDown33.Value > 2300 Then
             NumericUpDown33.BackColor = Color.Red
@@ -3968,16 +3994,20 @@ Public Class Form1
         case_x_conditions(15, 10) = "Discharge Density"
 
         '----------- performance-------------------
-        case_x_conditions(16, 10) = "dP Fan Static"
-        case_x_conditions(17, 10) = "dP Fan Dynamic"
-        case_x_conditions(18, 10) = "dP Fan Total"
+        case_x_conditions(16, 10) = "dP_Fan Static"
+        case_x_conditions(17, 10) = "dP_Fan Dynamic"
+        case_x_conditions(18, 10) = "dP_Fan Total"
         case_x_conditions(19, 10) = "Shaft power"
         case_x_conditions(20, 10) = "Efficiency"
         case_x_conditions(21, 10) = "Mol weight "
-        case_x_conditions(22, 10) = "dp Inlet box"
-        case_x_conditions(23, 10) = "dp Inlet VC-damper"
-        case_x_conditions(24, 10) = "dp Fan+IVC Stat"
-
+        case_x_conditions(22, 10) = "dP_Fan Required"
+        case_x_conditions(23, 10) = "dP_inlet Box"
+        case_x_conditions(24, 10) = "dP_IVC-damper"
+        case_x_conditions(25, 10) = "dP_Fan+Box+IVC"
+        If CheckBox15.Checked Then
+            case_x_conditions(26, 10) = "Position IVC"
+            case_x_conditions(26, 1) = "90"
+        End If
         '----------- Units------------------
         case_x_conditions(0, 11) = " "
         case_x_conditions(1, 11) = " "
@@ -4007,10 +4037,13 @@ Public Class Form1
         case_x_conditions(19, 11) = "[kW]"
         case_x_conditions(20, 11) = "[%]"
         case_x_conditions(21, 11) = "[g/mol]"
-        case_x_conditions(22, 11) = "[mbar]"
-        case_x_conditions(23, 11) = "[mbar]"
-        case_x_conditions(24, 11) = "[mbar]"
-
+        case_x_conditions(22, 11) = "[mbar_Stat]"
+        case_x_conditions(23, 11) = "[mbar_Stat]"
+        case_x_conditions(24, 11) = "[mbar_Stat]"
+        case_x_conditions(25, 11) = "[mbar_Stat]"
+        If CheckBox15.Checked Then
+            case_x_conditions(26, 11) = "[° open]"
+        End If
         '----------- general data------------------
         case_x_conditions(0, NumericUpDown72.Value) = TextBox89.Text                                'Case name 
         case_x_conditions(1, NumericUpDown72.Value) = Tschets(ComboBox1.SelectedIndex).Tname        'Model 
@@ -4048,22 +4081,24 @@ Public Class Form1
             case_x_conditions(21, NumericUpDown72.Value) = "n.a."
         End If
 
-        If CheckBox1.Checked Then
-            case_x_conditions(22, NumericUpDown72.Value) = TextBox391.Text              'Inlet box [mBar]
-        Else
-            case_x_conditions(22, NumericUpDown72.Value) = "n.a."
-        End If
+        case_x_conditions(22, NumericUpDown72.Value) = NumericUpDown37.Value                'Fan Pressure required
 
-        If CheckBox15.Checked Then
-            case_x_conditions(23, NumericUpDown72.Value) = TextBox390.Text              'Inlet VC-damper [mbar]
+        If CheckBox1.Checked Then
+            case_x_conditions(23, NumericUpDown72.Value) = TextBox391.Text                  'Inlet box [mBar Static]
         Else
             case_x_conditions(23, NumericUpDown72.Value) = "n.a."
         End If
 
-        If CheckBox1.Checked Or CheckBox15.Checked Then
-            case_x_conditions(24, NumericUpDown72.Value) = TextBox385.Text              'dp Fan+box+IVC [mbar]
+        If CheckBox15.Checked Then
+            case_x_conditions(24, NumericUpDown72.Value) = TextBox390.Text                  'Inlet VC-damper [mbar Static]
         Else
             case_x_conditions(24, NumericUpDown72.Value) = "n.a."
+        End If
+
+        If CheckBox1.Checked Or CheckBox15.Checked Then
+            case_x_conditions(25, NumericUpDown72.Value) = TextBox385.Text              'dp Fan+box+IVC [mbar]
+        Else
+            case_x_conditions(25, NumericUpDown72.Value) = "n.a."
         End If
 
 
