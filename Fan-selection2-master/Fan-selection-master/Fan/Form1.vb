@@ -1860,7 +1860,7 @@ Public Class Form1
 
                 '-------------------Inlet Vane Control lines ---------------------
                 Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18}     'Pressure loss coeff (*= 2.5)
-                Dim VC_open = New String() {"80", "70", "60", "50", "40", "30"}
+                Dim VC_open = New String() {"10", "20", "30", "40", "50", "60"}
                 Dim point_count As Integer
                 Dim point_count2 As Integer
                 Dim ivg_dp, ivg_pow As Double
@@ -1871,7 +1871,7 @@ Public Class Form1
                         If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)                  'Per uur
 
                         '-----------------CALC IVC -----
-                        IVC(line, hh).angle = Convert.ToDouble(VC_open(line))
+                        IVC(line, hh).angle = 90 - Convert.ToDouble(VC_open(line))
                         IVC(line, hh).flow = case_x_flow(hh, 0)
                         IVC(line, hh).phi = VC_phi(line)
 
@@ -1894,21 +1894,24 @@ Public Class Form1
                         End If
 
                         '------------------ NEEDS WORK----------------
-                        If CheckBox14.Checked And IVC(line, hh).power > case_x_Power(8, 0) Then                      'IVC Power lines
+                        If CheckBox14.Checked And IVC(line, hh).power > case_x_Power(8, 0) Then          'IVC Power lines
                             Chart1.Series(line + 20).Points.AddXY(debiet, Round(IVC(line, hh).power, 1))
                         End If
                     Next
-                    point_count = Chart1.Series(line + 10).Points.Count - 1                         'Last plotted point
-                    Chart1.Series(line + 10).Points(point_count).Label = VC_open(line) & "° (Pstat)"       'Add the VC opening angle 
+                    point_count = Chart1.Series(line + 10).Points.Count - 1                             'Last plotted point
+                    Chart1.Series(line + 10).Points(point_count).Label = VC_open(line) & "° (Pstat)"    'Add the VC opening angle 
 
                     If CheckBox14.Checked Then
-                        point_count2 = Chart1.Series(line + 20).Points.Count - 1                    'Last plotted point
+                        point_count2 = Chart1.Series(line + 20).Points.Count - 1                        'Last plotted point
                         Chart1.Series(line + 20).Points(point_count2).Label = VC_open(line) & "° (Power)"  'Add the VC opening angle 
                     End If
                 Next
 
                 If CheckBox13.Checked Then
-                    Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only"      'Add Remark 
+                    Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only" & vbCrLf      'Add Remark 
+                    Chart1.Series(13).Points(25).Label &= "Follow the system resistance line" & vbCrLf
+                    Chart1.Series(13).Points(25).Label &= "Save operation area is between 60 and 100% Flow" & vbCrLf
+                    Chart1.Series(13).Points(25).Label &= "Below 60% flow expect surging"
                 End If
 
 
