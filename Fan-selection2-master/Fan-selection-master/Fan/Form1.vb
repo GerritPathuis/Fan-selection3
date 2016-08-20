@@ -96,7 +96,7 @@ End Structure
 
 
 Public Class Form1
-    Public IVC(5, 51) As IVC_struct         '5 IVC lines, 50 points
+    Public IVC(6, 51) As IVC_struct         '6 IVC lines, 50 points
     Public Tschets(31) As Tmodel            'was 31
     Public section(4) As Shaft_section      'Impeller shaft section
     Public cp_air As Double = 1.005         'Specific heat air [kJ/kg.K]
@@ -1717,7 +1717,7 @@ Public Class Form1
     End Sub
 
     Private Sub draw_chart1(Tschets_no As Integer)
-        Dim hh As Integer
+        Dim hh, j As Integer
         Dim debiet As Double
         Dim Q_target, P_target As Double
         Dim Weerstand_Coefficient_line, p_loss_line As Double
@@ -1731,16 +1731,17 @@ Public Class Form1
 
                 '----------- Line type-----------
                 Chart1.ChartAreas.Add("ChartArea0")
-                For hh = 0 To 30
+                For hh = 0 To 40
                     Chart1.Series.Add("Series" & hh.ToString)
                     Chart1.Series(hh).ChartArea = "ChartArea0"
                     Chart1.Series(hh).ChartType = SeriesChartType.Line
                     Chart1.Series(hh).SmartLabelStyle.Enabled = True
+                    Chart1.Series(hh).Color = Color.Black         'marker
                 Next
 
                 '--------- Legend visible ----------------
                 Chart1.Series(4).IsVisibleInLegend = False          'Marker
-                For hh = 7 To 30
+                For hh = 7 To 40
                     Chart1.Series(hh).IsVisibleInLegend = False     'Vane control lines
                 Next
 
@@ -1756,11 +1757,11 @@ Public Class Form1
                 Chart1.Series(5).Name = "P static [mBar] "
                 Chart1.Series(6).Name = "Vane-Control "
 
-                Chart1.Series(0).Color = Color.LightGreen   'Total pressure
-                Chart1.Series(1).Color = Color.Red          'Efficiency
-                Chart1.Series(2).Color = Color.LightGreen   'Power
+                'Chart1.Series(0).Color = Color.LightGreen   'Total pressure
+                'Chart1.Series(1).Color = Color.Red          'Efficiency
+                'Chart1.Series(2).Color = Color.LightGreen   'Power
                 Chart1.Series(3).Color = Color.Blue         'marker
-                Chart1.Series(4).Color = Color.LightBlue    'Line resistance
+                'Chart1.Series(4).Color = Color.Black        'Line resistance
                 Chart1.Series(5).Color = Color.Blue         'Static pressure
 
                 '----------- labels on-off ------------------       
@@ -1812,20 +1813,13 @@ Public Class Form1
                 Next
 
                 '------------------ Grafiek tekst en target ---------------------
-                If CheckBox2.Checked Then               '========Per uur=========
-                    Q_target = G_Debiet_z_act_hr                                            '[Am3/hr]
-                    P_target = dp_static_inletbox_VC                                        '[mBar] Gewenste fan  gegevens
-                    Chart1.ChartAreas("ChartArea0").AxisX.Title = "Debiet [Am3/hr]"
-                Else                                    '========Per seconde=========
-                    Q_target = G_Debiet_z_act_hr / 3600                                     '[Am3/sec]
-                    P_target = dp_static_inletbox_VC                                        '[mBar] Gewenste fan  gegevens
-                    Chart1.ChartAreas("ChartArea0").AxisX.Title = "Debiet [Am3/sec]"
-                End If
+                Q_target = G_Debiet_z_act_hr / 3600                                     '[Am3/sec]
+                P_target = dp_static_inletbox_VC                                        '[mBar] Gewenste fan  gegevens
+                Chart1.ChartAreas("ChartArea0").AxisX.Title = "Debiet [Am3/sec]"
 
                 '---------------- add the fan lines-----------------------
                 For hh = 0 To 50
                     debiet = case_x_flow(hh, 0)
-                    If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)              'Per uur
                     Chart1.Series(0).Points.AddXY(debiet, Round(case_x_Ptot(hh), 1))
                     Chart1.Series(5).Points.AddXY(debiet, Round(case_x_Pstat(hh, 0), 2))
                     If CheckBox7.Checked Then Chart1.Series(1).Points.AddXY(debiet, Round(case_x_Efficiency(hh), 1))    'efficiency
@@ -1833,10 +1827,14 @@ Public Class Form1
                 Next hh
 
                 '----------- adding labels ----------------
-                Chart1.Series(0).Points(45).Label = "P.total"
-                Chart1.Series(5).Points(45).Label = "P.static"
-                If CheckBox7.Checked Then Chart1.Series(1).Points(45).Label = "Efficiency"  'efficiency
-                If CheckBox8.Checked Then Chart1.Series(2).Points(25).Label = "Power"       'Power
+                j = Chart1.Series(0).Points.Count - 3                                       'Last plotted point
+                Chart1.Series(0).Points(j).Label = "P.total"
+                j = Chart1.Series(5).Points.Count - 3                                       'Last plotted point
+                Chart1.Series(5).Points(j).Label = "P.static"
+                j = Chart1.Series(1).Points.Count - 3                                       'Last plotted point
+                If CheckBox7.Checked Then Chart1.Series(1).Points(j).Label = "Efficiency"   'efficiency
+                j = Chart1.Series(2).Points.Count - 3                                       'Last plotted point
+                If CheckBox8.Checked Then Chart1.Series(2).Points(j).Label = "Power"        'Power
 
                 '-------------------Target dot ---------------------
                 If CheckBox3.Checked Then
@@ -1849,85 +1847,96 @@ Public Class Form1
                     Weerstand_Coefficient_line = P_target * 2 / (NumericUpDown12.Value * Q_target ^ 2)
                     For hh = 0 To 50
                         debiet = case_x_flow(hh, 0)
-                        If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)      'Per uur
 
                         If CheckBox10.Checked Then
                             p_loss_line = 0.5 * Weerstand_Coefficient_line * NumericUpDown12.Value * debiet ^ 2
                             If p_loss_line < P_target * 1.1 Then Chart1.Series(4).Points.AddXY(debiet, p_loss_line)
                         End If
-                    Next
+                    Next hh
                 End If
 
                 '-------------------Inlet Vane Control lines ---------------------
-                Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18}     'Pressure loss coeff (*= 2.5)
-                Dim VC_open = New String() {"10", "20", "30", "40", "50", "60"}
-                Dim point_count As Integer
-                Dim point_count2 As Integer
+                Dim VC_phi = New Double() {0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.23}     'Pressure loss coeff (*= 2.5)
+                Dim VC_open = New String() {"10", "20", "30", "40", "50", "60", "70", "80"}
                 Dim ivg_dp, ivg_pow As Double
+                Dim Y_scale_max As Double
 
-                For line = 0 To 5                                                                'No IVC lines in graph
+                '-----------------CALC IVC ----- 
+                For line = 0 To 6                                                        'IVC lines in graph
                     For hh = 0 To 50
                         debiet = case_x_flow(hh, 0)
-                        If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)                  'Per uur
-
-                        '-----------------CALC IVC -----
                         IVC(line, hh).angle = 90 - Convert.ToDouble(VC_open(line))
                         IVC(line, hh).flow = case_x_flow(hh, 0)
                         IVC(line, hh).phi = VC_phi(line)
 
                         dp_IVC(IVC(line, hh).phi, IVC(line, hh).flow, IVC(line, hh).angle, ivg_dp, ivg_pow)
-                        IVC(line, hh).pstat = case_x_Pstat(hh, 0) - ivg_dp                          'Pressure lines
-                        IVC(line, hh).power = case_x_Power(hh, 0) - ivg_pow                         'Power lines
+                        IVC(line, hh).pstat = case_x_Pstat(hh, 0) - ivg_dp               'Pressure lines
+                        IVC(line, hh).power = case_x_Power(hh, 0) - ivg_pow              'Power lines
 
                         If IVC(line, hh).pstat < 0 Then IVC(line, hh).pstat = 0
                     Next hh
                 Next line
 
-                '------------ Now present-------------------------
-                For line = 0 To 5                                                                   'No IVC lines in graph
-                    Chart1.Series(line + 10).Color = Color.Black                                    'Static pressure
-                    For hh = 0 To 50
-                        debiet = case_x_flow(hh, 0)
-                        If CheckBox2.Checked Then debiet = Round(debiet * 3600, 1)                  'Per uur
-                        If CheckBox13.Checked And IVC(line, hh).pstat > 10 Then                     'Static Pressure
-                            Chart1.Series(line + 10).Points.AddXY(debiet, Round(IVC(line, hh).pstat, 1))
-                        End If
-
-                        '------------------ NEEDS WORK----------------
-                        If CheckBox14.Checked And IVC(line, hh).power > case_x_Power(8, 0) Then          'IVC Power lines
-                            Chart1.Series(line + 20).Points.AddXY(debiet, Round(IVC(line, hh).power, 1))
-                        End If
-                    Next
-                    point_count = Chart1.Series(line + 10).Points.Count - 1                             'Last plotted point
-                    Chart1.Series(line + 10).Points(point_count).Label = VC_open(line) & "° (Pstat)"    'Add the VC opening angle 
-
-                    If CheckBox14.Checked Then
-                        point_count2 = Chart1.Series(line + 20).Points.Count - 1                        'Last plotted point
-                        Chart1.Series(line + 20).Points(point_count2).Label = VC_open(line) & "° (Power)"  'Add the VC opening angle 
-                    End If
-                Next
-
+                '------------ Now present the static IVC pressure chart-------------------------
                 If CheckBox13.Checked Then
+                    For line = 0 To 6                                                         'IVC lines in graph
+                        Chart1.Series(line + 10).Color = Color.Black                          'Static pressure
+                        For hh = 0 To 50
+                            debiet = case_x_flow(hh, 0)
+                            '----------------- Plot  Static Pressure ----------
+                            If IVC(line, hh).pstat > 10 Then
+                                Chart1.Series(line + 10).Points.AddXY(debiet, Round(IVC(line, hh).pstat, 1))
+                            End If
+                        Next hh
+
+                        '------------- add opening angle to Pstat line -----------
+                        j = Chart1.Series(line + 10).Points.Count - 1                             'Last plotted point
+                        Chart1.Series(line + 10).Points(j).Label = VC_open(line) & "° (Pstat)"    'Add the VC opening angle 
+                    Next line
                     Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only" & vbCrLf      'Add Remark 
                     Chart1.Series(13).Points(25).Label &= "Follow the system resistance line" & vbCrLf
                     Chart1.Series(13).Points(25).Label &= "Save operation area is between 60 and 100% Flow" & vbCrLf
                     Chart1.Series(13).Points(25).Label &= "Below 60% flow expect surging"
                 End If
 
+                '------------ Now present the IVC power lines-------------------------
+                If CheckBox14.Checked Then
+                    For line = 0 To 6                                                           'IVC lines in graph
+                        For hh = 0 To 50
+                            debiet = case_x_flow(hh, 0)
+                            '----------------- Plot  power line ----------
+                            'First few points of the power line are not plotted
+                            If IVC(line, hh).power > case_x_Power(2, 0) Then                    'IVC Power lines
+                                Chart1.Series(line + 20).Points.AddXY(debiet, Round(IVC(line, hh).power, 1))
+                            End If
+                        Next hh
+                        '------------- add opening angle to power line -----------
+                        j = Chart1.Series(line + 20).Points.Count - 1               'Last plotted point
+                        Chart1.Series(line + 20).Points(j).Label = VC_open(line) & "° (Power)"  'Add the VC opening angle
+                    Next line
+                End If
 
-                '---------------Outlet damper-----------------
+                '---------------Outlet damper resistance lines-----------------
                 If CheckBox16.Checked Then
-                    ' P_loss_Out_Flow_damper(Series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
+                    Chart1.ChartAreas("ChartArea0").RecalculateAxesScale()          'Recalc to finf max value
+                    Y_scale_max = Chart1.ChartAreas("ChartArea0").AxisY.Maximum     'Get the max value
+                    For line = 0 To 6                                               '6 resistance lines
+                        For hh = 0 To 50                                            'calc 50 points
+                            debiet = case_x_flow(hh, 0)                             'Get flow
+                            p_loss_line = 0.5 * (Weerstand_Coefficient_line + line ^ 2) * NumericUpDown12.Value * debiet ^ 2
+                            If p_loss_line < Y_scale_max Then Chart1.Series(line + 30).Points.AddXY(debiet, p_loss_line)
+                        Next hh
+                    Next line
                 End If
 
                 Chart1.Refresh()
             Catch ex As Exception
-                'MessageBox.Show(ex.Message & "Line 1780")  ' Show the exception's message.
+                'MessageBox.Show(ex.Message & "Line 1934")  ' Show the exception's message.
             End Try
         End If
     End Sub
 
-    Private sub dp_IVC(ByVal phi As Double, ByVal debiet As Double, ByVal alpha As Double, ByRef ivc_loss As Double, ByRef ivc_power As Double)
+    Private Sub dp_IVC(ByVal phi As Double, ByVal debiet As Double, ByVal alpha As Double, ByRef ivc_loss As Double, ByRef ivc_power As Double)
         Dim ivc_area, ivc_speed, ivc_dia, ivc_density, debiet_sec As Double
 
         Double.TryParse(TextBox159.Text, ivc_dia)                           'Inlet diameter
@@ -1936,18 +1945,9 @@ Public Class Form1
         ivc_density = NumericUpDown12.Value                                 '[kg/m3]
 
         debiet_sec = debiet                                                 'debiet in [m3/sec]
-        If CheckBox2.Checked Then debiet_sec = debiet / 3600                'debiet in [m3/hr]
         ivc_speed = debiet_sec / ivc_area                                   '[m/s]
         ivc_loss = 0.5 * phi * ivc_density * ivc_speed ^ 2                  '[mbar]
         ivc_power = ivc_loss * ivc_speed / 100                              '[kW]
-    End sub
-
-
-    'Pressure loss over the Outlet Flow Damper
-    Private Sub P_loss_Out_Flow_damper(series As Integer, phi As Double, hh As Integer, debiet As Double, alpha As Double)
-        'Future
-        'Future
-        'Future
     End Sub
 
     'Write to Word document
@@ -3392,7 +3392,7 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click, CheckBox6.CheckedChanged, CheckBox3.CheckedChanged, CheckBox2.CheckedChanged, TabPage3.Enter, NumericUpDown9.ValueChanged, NumericUpDown10.ValueChanged, CheckBox7.CheckedChanged, CheckBox8.CheckedChanged, CheckBox10.CheckedChanged, CheckBox13.CheckedChanged, CheckBox14.CheckedChanged
+    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click, CheckBox6.CheckedChanged, CheckBox3.CheckedChanged, NumericUpDown9.ValueChanged, NumericUpDown10.ValueChanged, CheckBox7.CheckedChanged, CheckBox8.CheckedChanged, CheckBox10.CheckedChanged, CheckBox13.CheckedChanged, CheckBox14.CheckedChanged, CheckBox16.CheckedChanged
         NumericUpDown33.Value = NumericUpDown9.Value
         If NumericUpDown33.Value > 2300 Then
             NumericUpDown33.BackColor = Color.Red
