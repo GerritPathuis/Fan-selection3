@@ -4219,9 +4219,9 @@ Public Class Form1
         oTable.Cell(row, 1).Range.Text = "~ Materiaal waaier"
         oTable.Cell(row, 2).Range.Text = ComboBox3.Text
         row += 1
-        oTable.Cell(3, 1).Range.Text = "~ Waaier temperatuur"
-        oTable.Cell(3, 2).Range.Text = NumericUpDown18.Value
-        oTable.Cell(3, 3).Range.Text = "[°C]"
+        oTable.Cell(row, 1).Range.Text = "~ Waaier temperatuur"
+        oTable.Cell(row, 2).Range.Text = NumericUpDown18.Value
+        oTable.Cell(row, 3).Range.Text = "[°C]"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Max. toegestane treksterkte"
         oTable.Cell(row, 2).Range.Text = TextBox40.Text
@@ -4349,11 +4349,157 @@ Public Class Form1
         End If
     End Sub
 
+    Private Sub Button24_Click(sender As Object, e As EventArgs) Handles Button24.Click
+        Dim oWord As Word.Application
+        Dim oDoc As Word.Document
+        Dim oTable As Word.Table
+        Dim oPara1, oPara2, oPara3 As Word.Paragraph
+        Dim ufilename As String
+        Dim row As Integer
+
+        'Start Word and open the document template. 
+        oWord = CreateObject("Word.Application")
+        oWord.Visible = True
+        oDoc = oWord.Documents.Add
+
+        'Insert a paragraph at the beginning of the document. 
+        oPara1 = oDoc.Content.Paragraphs.Add
+        oPara1.Range.Text = "VTK Engineering"
+        oPara1.Range.Font.Name = "Arial"
+        oPara1.Range.Font.Size = 16
+        oPara1.Range.Font.Bold = True
+        oPara1.Format.SpaceAfter = 2                '24 pt spacing after paragraph. 
+        oPara1.Range.InsertParagraphAfter()
+
+        oPara2 = oDoc.Content.Paragraphs.Add(oDoc.Bookmarks.Item("\endofdoc").Range)
+        oPara2.Range.Font.Size = 11
+        oPara2.Format.SpaceAfter = 1
+        oPara2.Range.Font.Bold = False
+        oPara2.Range.Text = "Electric Motor Data" & vbCrLf
+        oPara2.Range.InsertParagraphAfter()
+
+        '----------------------------------------------
+        'Insert a table, fill it with data and change the column widths.
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 4, 2)
+        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable.Range.Font.Size = 9
+        oTable.Range.Font.Bold = False
+        oTable.Rows.Item(1).Range.Font.Bold = True
+
+        oTable.Cell(1, 1).Range.Text = "Project Name"
+        oTable.Cell(1, 2).Range.Text = TextBox284.Text
+        oTable.Cell(2, 1).Range.Text = "Project number "
+        oTable.Cell(2, 2).Range.Text = TextBox283.Text
+        oTable.Cell(3, 1).Range.Text = "Author "
+        oTable.Cell(3, 2).Range.Text = Environment.UserName
+        oTable.Cell(4, 1).Range.Text = "Date"
+        oTable.Cell(4, 2).Range.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+
+        oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
+        oTable.Columns(2).Width = oWord.InchesToPoints(2)
+        oTable.Rows.Item(1).Range.Font.Bold = True
+        oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
+
+        '----------------------------------------------
+        'Insert a table, fill it with data and change the column widths.
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 6, 3)
+        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable.Range.Font.Size = 9
+        oTable.Range.Font.Bold = False
+        row = 1
+        oTable.Rows.Item(row).Range.Font.Bold = True
+        oTable.Cell(row, 1).Range.Text = "Electric motor"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Installed Power"
+        oTable.Cell(row, 2).Range.Text = ComboBox6.Text
+        oTable.Cell(row, 3).Range.Text = "[kW]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Fan power @ max speed"
+        oTable.Cell(row, 2).Range.Text = TextBox214.Text
+        oTable.Cell(row, 3).Range.Text = "[kW]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Motor rated Speed"
+        oTable.Cell(row, 2).Range.Text = TextBox195.Text
+        oTable.Cell(row, 3).Range.Text = "[rpm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Starting method"
+        oTable.Cell(row, 2).Range.Text = "DOL/VSD"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Inertia Fan Impeller "
+        oTable.Cell(row, 2).Range.Text = TextBox202.Text
+        oTable.Cell(row, 3).Range.Text = "[kg.m2]"
+
+        oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
+        oTable.Columns(2).Width = oWord.InchesToPoints(1.3)
+        oTable.Columns(3).Width = oWord.InchesToPoints(0.8)
+        oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
+
+
+        '----------------------------------------------
+        'Insert a table, fill it with data and change the column widths.
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 12, 2)
+        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable.Range.Font.Size = 9
+        oTable.Range.Font.Bold = False
+        row = 1
+        oTable.Rows.Item(row).Range.Font.Bold = True
+        oTable.Cell(row, 1).Range.Text = "Specifications"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Voltage"
+        oTable.Cell(row, 2).Range.Text = ". [V] "
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Frequency"
+        oTable.Cell(row, 2).Range.Text = "50/60 [Hz]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Bearings"
+        oTable.Cell(row, 2).Range.Text = "anti friction/Hydrostatic "
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Heater"
+        oTable.Cell(row, 2).Range.Text = "Yes/No"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Coil temperature"
+        oTable.Cell(row, 2).Range.Text = "Pt100"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Bearing temp. (2x)"
+        oTable.Cell(row, 2).Range.Text = "Pt100"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Segrated terminal boxes"
+        oTable.Cell(row, 2).Range.Text = "Power-heater-coil temperature"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Starting"
+        oTable.Cell(row, 2).Range.Text = "TBA per hour"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Ambient temp"
+        oTable.Cell(row, 2).Range.Text = ".. celsius"
+
+
+        oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
+        oTable.Columns(2).Width = oWord.InchesToPoints(2.3)
+
+        oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
+
+
+        '------------------save picture ---------------- 
+        Chart3.SaveImage("c:\Temp\Emotor.gif", System.Drawing.Imaging.ImageFormat.Gif)
+        oPara3 = oDoc.Content.Paragraphs.Add
+        oPara3.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter
+        oPara3.Range.InlineShapes.AddPicture("c:\Temp\Emotor.gif")
+        oPara3.Range.InlineShapes.Item(1).LockAspectRatio = True
+        'oPara4.Range.InlineShapes.Item(1).Width = 400
+        oPara3.Range.InsertParagraphAfter()
+
+        ufilename = "N:\Engineering\VBasic\Rapport_copy\Fan_motor_report_" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & ".docx"
+
+        If Directory.Exists("N:\Engineering\VBasic\Rapport_copy") Then
+            GroupBox12.Text = "File saved at " & ufilename
+            oWord.ActiveDocument.SaveAs(ufilename)
+        End If
+    End Sub
 
     Private Sub calc_emotor_4P()
         'see http://ecatalog.weg.net/files/wegnet/WEG-specification-of-electric-motors-50039409-manual-english.pdf
         'see http://electrical-engineering-portal.com/calculation-of-motor-starting-time-as-first-approximation
-        Dim Ins_power, required_power, aanlooptijd, n_actual, rad, shaft_power As Double
+        Dim Ins_power, required_power, required_power_savety, aanlooptijd, n_actual, rad, shaft_power As Double
         Dim m_torque_inrush, m_torque_max, m_torque_rated, m_torque_average As Double
         Dim impellar_inertia, motor_inertia, total_inertia As Double
         Dim ang_acceleration, C_acc, inertia_torque, fan_load_torque As Double
@@ -4364,6 +4510,7 @@ Public Class Form1
             '--------- motor torque-------------
             Dim words() As String = emotor_4P(ComboBox6.SelectedIndex).Split(";")
             Ins_power = words(0) * 1000             'Geinstalleerd vermogen [Watt]
+
 
             Select Case True                        'Toerental motor [rpm] 50 Hz
                 Case RadioButton30.Checked
@@ -4393,44 +4540,45 @@ Public Class Form1
             m_torque_average = 0.45 * (m_torque_inrush + m_torque_max)
 
             '---------- actual required fan power----------------
-            required_power = NumericUpDown36.Value * Ins_power  '[kW]
-            fan_load_torque = required_power / rad              '[N.m]
+            required_power = Convert.ToDouble(TextBox274.Text) * 1000       '[kW]--> [W]
+            required_power_savety = required_power / NumericUpDown36.Value
+
+            fan_load_torque = required_power_savety / rad                   '[N.m]
 
             '------------- inertia load--------------------
             Double.TryParse(TextBox109.Text, impellar_inertia)
-            impellar_inertia = impellar_inertia * NumericUpDown35.Value ^ 2         'in case speed ratio impeller/motor 
+            impellar_inertia = impellar_inertia * NumericUpDown35.Value ^ 2     'in case speed ratio impeller/motor 
 
             '------------- inertia motor--------------------
             motor_inertia = emotor_4P_inert(n_actual, Ins_power)
 
-            total_inertia = impellar_inertia + motor_inertia    '[kg.m2]
-            inertia_torque = total_inertia * ang_acceleration     '[N.m]
+            total_inertia = impellar_inertia + motor_inertia        '[kg.m2]
+            inertia_torque = total_inertia * ang_acceleration       '[N.m]
 
             '-------------- aanloop tijd---------------
             C_acc = 0.45 * (m_torque_inrush + m_torque_max) - (NumericUpDown38.Value * fan_load_torque)
             aanlooptijd = 2 * PI * n_actual * total_inertia / (60 * C_acc)
         End If
 
-        TextBox195.Text = Round(n_actual, 0).ToString               'Toerental [rpm]
-        TextBox196.Text = Round(rad, 0).ToString                    'Hoeksnelheid [rad/s]
-        TextBox197.Text = Round(m_torque_inrush, 0).ToString        'Start torque [N.m]
-        TextBox198.Text = Round(m_torque_max, 0).ToString           'Max torque [N.m]
-        TextBox199.Text = Round(motor_inertia, 2).ToString          'Motor inertia [kg.m2]
-        TextBox200.Text = Round(m_torque_rated, 0).ToString         'Rated torque [N.m]
-        TextBox202.Text = Round(impellar_inertia, 1).ToString       'impellar inertia [kg.m2]
-        TextBox207.Text = Round(motor_inertia, 1).ToString          'motor inertia [kg.m2]
-        NumericUpDown46.Value = Round(motor_inertia, 1).ToString    'motor inertia [kg.m2]
-        TextBox213.Text = Round(total_inertia, 1).ToString          'Total inertia[kg.m2]
-        TextBox206.Text = Round(m_torque_average, 0).ToString       'Torque average [kg.m2]
-        TextBox205.Text = Round(C_acc, 0).ToString                  'Effective acceleration torque [N.m]
-        TextBox214.Text = Round(required_power / 1000, 0).ToString  'Fan power @ max speed [kw]
-        TextBox215.Text = Round(fan_load_torque, 0).ToString        'Fan torque @ max speed [N.m]
-        TextBox146.Text = Round(aanlooptijd, 1).ToString            'Aanlooptijd [s]
+        TextBox195.Text = Round(n_actual, 0).ToString                   'Toerental [rpm]
+        TextBox196.Text = Round(rad, 0).ToString                        'Hoeksnelheid [rad/s]
+        TextBox197.Text = Round(m_torque_inrush, 0).ToString            'Start torque [N.m]
+        TextBox198.Text = Round(m_torque_max, 0).ToString               'Max torque [N.m]
+        TextBox199.Text = Round(motor_inertia, 2).ToString              'Motor inertia [kg.m2]
+        TextBox200.Text = Round(m_torque_rated, 0).ToString             'Rated torque [N.m]
+        TextBox202.Text = Round(impellar_inertia, 1).ToString           'impellar inertia [kg.m2]
+        TextBox207.Text = Round(motor_inertia, 1).ToString              'motor inertia [kg.m2]
+        NumericUpDown46.Value = Round(motor_inertia, 1).ToString        'motor inertia [kg.m2]
+        TextBox213.Text = Round(total_inertia, 1).ToString              'Total inertia[kg.m2]
+        TextBox206.Text = Round(m_torque_average, 0).ToString           'Torque average [kg.m2]
+        TextBox205.Text = Round(C_acc, 0).ToString                      'Effective acceleration torque [N.m]
+        TextBox214.Text = Round(required_power / 1000, 0).ToString      'Fan power @ max speed [kw]
+        TextBox393.Text = Round(required_power_savety / 1000, 0).ToString          'Fan power @ max speed [kw]+savety
+        TextBox215.Text = Round(fan_load_torque, 0).ToString            'Fan torque @ max speed [N.m]
+        TextBox146.Text = Round(aanlooptijd, 1).ToString                'Aanlooptijd [s]
 
-        '------- check geinstalleerd vermogen 15% safety --------------------
-        Double.TryParse(TextBox274.Text, shaft_power)
-
-        If (Ins_power < (shaft_power * 1000 * 1.15)) Then        '15% safety
+        '------- check geinstalleerd vermogen --------------------
+        If (Ins_power < required_power_savety) Then
             Label254.Visible = True
             ComboBox6.BackColor = Color.Red
         Else
@@ -4453,15 +4601,16 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles TabPage12.Enter, NumericUpDown38.ValueChanged, NumericUpDown34.ValueChanged, NumericUpDown14.ValueChanged, ComboBox6.SelectedIndexChanged, NumericUpDown35.ValueChanged, NumericUpDown36.ValueChanged, RadioButton30.CheckedChanged, RadioButton36.CheckedChanged, RadioButton35.CheckedChanged, RadioButton34.CheckedChanged, RadioButton33.CheckedChanged, RadioButton32.CheckedChanged, RadioButton31.CheckedChanged, RadioButton29.CheckedChanged
+    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles TabPage12.Enter, NumericUpDown38.ValueChanged, NumericUpDown34.ValueChanged, NumericUpDown14.ValueChanged, ComboBox6.SelectedIndexChanged, NumericUpDown35.ValueChanged, NumericUpDown36.ValueChanged, RadioButton30.CheckedChanged, RadioButton36.CheckedChanged, RadioButton35.CheckedChanged, RadioButton34.CheckedChanged, RadioButton33.CheckedChanged, RadioButton32.CheckedChanged, RadioButton31.CheckedChanged, RadioButton29.CheckedChanged, Button9.Click
         Calc_stress_impeller()
         calc_emotor_4P()
         draw_chart3()
     End Sub
     Private Sub draw_chart3()
-        Dim hh As Integer
-        Dim words() As String
-
+        'Dim hh As Integer
+        'Dim words() As String
+        Dim a, b, c As Double
+        Dim x, y As Double
         Try
             'Clear all series And chart areas so we can re-add them
             Chart3.Series.Clear()
@@ -4471,21 +4620,39 @@ Public Class Form1
             Chart3.ChartAreas.Add("ChartArea0")
             Chart3.Series(0).ChartArea = "ChartArea0"
             Chart3.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Line
-            Chart3.Titles.Add("VSD motor koppel")
-            Chart3.Titles(0).Font = New Font("Arial", 16, System.Drawing.FontStyle.Bold)
-            Chart3.Series(0).Name = "Koppel motor [%]"
+            Chart3.Titles.Add("Load Torque curve" & vbCrLf & "Inertial impeller " & TextBox202.Text & " [kg.m2]")
+            Chart3.Titles(0).Font = New Font("Arial", 12, System.Drawing.FontStyle.Bold)
+            Chart3.Series(0).Name = "Koppel[%]"
             Chart3.Series(0).Color = Color.Blue
+            Chart3.Series(0).IsVisibleInLegend = False
             Chart3.ChartAreas("ChartArea0").AxisX.Minimum = 0
+            Chart3.ChartAreas("ChartArea0").AxisX.Maximum = 100
+            Chart3.ChartAreas("ChartArea0").AxisY.Maximum = 100
             Chart3.ChartAreas("ChartArea0").AxisX.MinorTickMark.Enabled = True
-            Chart3.ChartAreas("ChartArea0").AxisY.Title = "Koppel [-]"
-            Chart3.ChartAreas("ChartArea0").AxisX.Title = "[Hz]"
+            Chart3.ChartAreas("ChartArea0").AxisY.Title = "Koppel [%]"
+            Chart3.ChartAreas("ChartArea0").AxisX.Title = "Toerental [%]"
+
+            '------------------- Calc fan torque ---------
+            'Xas (N) 0-100% rpm
+            'yas (T) 0-100% torque
+            'y=c.(x-a)^2+b
+
+            c = 0.011   'Breedte parabool
+            b = 8       'Vertikale verschuiving
+            a = 8       'Horizontale Verschuiving
+
+            For x = 0 To 100
+                y = c * (x - a) ^ 2 + b
+                Chart3.Series(0).Points.AddXY(x, y)
+            Next x
+
 
             '------------------- Draw the lines in the chart--------------------
-            For hh = 0 To (EXD_VSD_torque.Length - 1)
-                words = EXD_VSD_torque(hh).Split(";")
+            'For hh = 0 To (EXD_VSD_torque.Length - 1)
+            '    words = EXD_VSD_torque(hh).Split(";")
 
-                Chart3.Series(0).Points.AddXY(words(0), words(2))
-            Next hh
+            '    Chart3.Series(0).Points.AddXY(words(0), words(2))
+            'Next hh
             Chart3.Refresh()
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Line 2400")  ' Show the exception's message.
