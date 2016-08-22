@@ -1100,6 +1100,8 @@ Public Class Form1
 
         '-------------- waaier en waaier-as gewicht------------------------------
         If RadioButton37.Checked Then   'Plaat schoepen
+            GroupBox4.Visible = True
+            GroupBox30.Visible = False
             Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + las_gewicht    'Gewicht tbv N_krit
             Waaier_gewicht *= NumericUpDown40.Value             'Aantal waaiers
             Waaier_as_gewicht = Waaier_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley     'totaal gewicht
@@ -1108,6 +1110,8 @@ Public Class Form1
                 Waaier_as_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
             End If
         Else                            'Airfoil schoepen
+            GroupBox4.Visible = False
+            GroupBox30.Visible = True
             Waaier_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + las_gewicht     'Gewicht tbv N_krit
             Waaier_gewicht *= NumericUpDown40.Value                                             'Aantal waaiers
             Waaier_as_gewicht = Waaier_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
@@ -1744,8 +1748,8 @@ Public Class Form1
                 For hh = 7 To 40
                     Chart1.Series(hh).IsVisibleInLegend = False     'Vane control lines
                 Next
-
-                Chart1.Titles.Add(Tschets(Tschets_no).Tname)
+                get_model_name()
+                Chart1.Titles.Add(Label1.Text)
                 Chart1.Titles(0).Font = New Font("Arial", 16, System.Drawing.FontStyle.Bold)
 
                 '--------- Legend names ----------------
@@ -1918,15 +1922,18 @@ Public Class Form1
 
                 '---------------Outlet damper resistance lines-----------------
                 If CheckBox16.Checked Then
+                    NumericUpDown56.Visible = True
                     Chart1.ChartAreas("ChartArea0").RecalculateAxesScale()          'Recalc to finf max value
                     Y_scale_max = Chart1.ChartAreas("ChartArea0").AxisY.Maximum     'Get the max value
                     For line = 0 To 6                                               '6 resistance lines
                         For hh = 0 To 50                                            'calc 50 points
                             debiet = case_x_flow(hh, 0)                             'Get flow
-                            p_loss_line = 0.5 * (Weerstand_Coefficient_line + line ^ 2) * NumericUpDown12.Value * debiet ^ 2
+                            p_loss_line = 0.5 * (Weerstand_Coefficient_line + NumericUpDown56.Value * line ^ 2) * NumericUpDown12.Value * debiet ^ 2
                             If p_loss_line < Y_scale_max Then Chart1.Series(line + 30).Points.AddXY(debiet, p_loss_line)
                         Next hh
                     Next line
+                Else
+                    NumericUpDown56.Visible = False
                 End If
 
                 Chart1.Refresh()
@@ -2546,15 +2553,15 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown27.ValueChanged, NumericUpDown26.ValueChanged, NumericUpDown25.ValueChanged, NumericUpDown24.ValueChanged, NumericUpDown23.ValueChanged, NumericUpDown22.ValueChanged, TabPage5.Enter, NumericUpDown16.ValueChanged, ComboBox4.SelectedIndexChanged, RadioButton7.CheckedChanged, NumericUpDown15.ValueChanged, NumericUpDown46.ValueChanged, NumericUpDown45.ValueChanged, NumericUpDown44.ValueChanged, NumericUpDown43.ValueChanged, NumericUpDown48.ValueChanged, NumericUpDown56.ValueChanged, NumericUpDown49.ValueChanged, RadioButton15.CheckedChanged
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown27.ValueChanged, NumericUpDown26.ValueChanged, NumericUpDown25.ValueChanged, NumericUpDown24.ValueChanged, NumericUpDown23.ValueChanged, NumericUpDown22.ValueChanged, TabPage5.Enter, NumericUpDown16.ValueChanged, ComboBox4.SelectedIndexChanged, RadioButton7.CheckedChanged, NumericUpDown15.ValueChanged, NumericUpDown46.ValueChanged, NumericUpDown45.ValueChanged, NumericUpDown44.ValueChanged, NumericUpDown43.ValueChanged, NumericUpDown48.ValueChanged
         calc_bearing_belts()
         Torsional_stiffness()
         Torsional_analyses()
     End Sub
     'Stiffness calculation of the impellear shaft
     Private Sub Torsional_stiffness()
-        Dim g_modulus As Double             'modulus Of elasticity In shear
-        Dim k_total, k2 As Double           'modulus Of elasticity In shear
+        Dim g_modulus As Double         'modulus Of elasticity In shear
+        Dim k_total As Double           'modulus Of elasticity In shear
 
         TextBox257.Text = Round(NumericUpDown44.Value * PI / 180, 0).ToString       'Coupling, Convert rad to degree
 
@@ -2572,10 +2579,6 @@ Public Class Form1
         section(2).length = NumericUpDown24.Value / 1000
         section(2).k_stiffness = PI * g_modulus * section(2).dia ^ 4 / (32 * section(2).length)
 
-        section(3).dia = NumericUpDown49.Value / 1000
-        section(3).length = NumericUpDown56.Value / 1000
-        section(3).k_stiffness = PI * g_modulus * section(3).dia ^ 4 / (32 * section(3).length)
-
         k_total = 1 / (1 / section(0).k_stiffness + 1 / section(1).k_stiffness + 1 / section(2).k_stiffness)
 
         If Not Double.IsNaN(k_total) And Not Double.IsInfinity(k_total) Then   'preventing NaN problem and infinity problems
@@ -2583,11 +2586,7 @@ Public Class Form1
             TextBox259.Text = Round(k_total, 0).ToString
             TextBox258.Text = Round(k_total * PI / 180, 0).ToString       'Drive shaft, Convert rad to degree
         End If
-        'De as tussen de waaiers bij meerstrappers
-        k2 = section(3).k_stiffness
-        If Not Double.IsNaN(k2) And Not Double.IsInfinity(k2) Then   'preventing NaN problem and infinity problems
-            TextBox220.Text = Round(k2, 0).ToString
-        End If
+
     End Sub
 
     Private Sub Torsional_analyses()
@@ -2653,8 +2652,8 @@ Public Class Form1
 
     'Holzer residual torque analyses
     Private Function calc_zeroTorsion_4(omega As Double)
-        Dim theta_1, theta_2, theta_3, theta_4 As Double
-        Dim Torsion_1, Torsion_2, Torsion_3, Torsion_4 As Double
+        Dim theta_1, theta_2, theta_3 As Double
+        Dim Torsion_1, Torsion_2, Torsion_3 As Double
 
         theta_1 = 1                                             'Initial hoek verdraaiiing
         Torsion_1 = (omega ^ 2) * Inertia_1 * theta_1
@@ -2662,15 +2661,8 @@ Public Class Form1
         Torsion_2 = Torsion_1 + (omega ^ 2) * Inertia_2 * theta_2
         theta_3 = theta_2 - Torsion_2 / Springstiff_2           'theta_2 - ((omega ^ 2) / Springstiff_2) * (Inertia_1 * theta_1 + Inertia_2 * theta_2)
         Torsion_3 = Torsion_2 + (omega ^ 2) * Inertia_3 * theta_3
-        theta_4 = theta_3 - Torsion_3 / Springstiff_3
-        Torsion_4 = Torsion_3 + (omega ^ 2) * Inertia_4 * theta_4
 
-        If (RadioButton15.Checked) Then
-            Return (Torsion_3)                 '[Nm] enkel trapper
-        Else
-            Return (Torsion_4)                 '[Nm] meer trapper
-        End If
-
+        Return (Torsion_3)                 '[Nm] enkel trapper
     End Function
 
     Private Sub draw_chart4()
@@ -2691,7 +2683,7 @@ Public Class Form1
             Chart4.Titles(0).Font = New Font("Arial", 16, System.Drawing.FontStyle.Bold)
 
             Chart4.Series(0).Name = "Torque"
-            Chart4.Series(0).Color = Color.LightGreen
+            Chart4.Series(0).Color = Color.Black
             Chart4.Series(0).BorderWidth = 1
 
             Chart4.ChartAreas("ChartArea0").AxisX.Title = "[rpm]"
@@ -2709,12 +2701,12 @@ Public Class Form1
     End Sub
 
     Private Sub calc_bearing_belts()
-        Dim length_a, length_b, length_c, length_naaf As Double
-        Dim dia_a, dia_b, dia_c, dia_naaf As Double
+        Dim length_a, length_b, length_c, length_d, length_e, length_naaf As Double
+        Dim dia_a, dia_b, dia_c, dia_d, dia_naaf As Double
         Dim g_shaft_a, g_shaft_b, g_shaft_c, sg_staal As Double
         Dim J_shaft_a, J_shaft_b, J_shaft_c, J_shaft_total As Double
         Dim I_shaft_a, I_shaft_b, I_shaft_c As Double
-        Dim gewicht_as, gewicht_waaier, gewicht_pulley, gewicht_naaf As Double
+        Dim gewicht_as, gewicht_waaier, gewicht_pulley, gewicht_naaf, g_as_tussen_lagers As Double
         Dim Force_combi1, Force_combi2, Force_combi3 As Double
         Dim N_kritisch_as, N_max_tussen As Double
         Dim N_max_doorbuiging As Double
@@ -2738,17 +2730,24 @@ Public Class Form1
         length_b = NumericUpDown23.Value / 1000         '[m]
         length_c = NumericUpDown24.Value / 1000         '[m]
         length_naaf = NumericUpDown29.Value / 1000      '[m]
+        length_d = NumericUpDown85.Value / 1000         '[m]
+        length_e = NumericUpDown86.Value / 1000         '[m]
+
 
         dia_a = NumericUpDown25.Value / 1000            '[m]
         dia_b = NumericUpDown26.Value / 1000            '[m]
         dia_c = NumericUpDown27.Value / 1000            '[m]
         dia_naaf = NumericUpDown28.Value / 1000         '[m]
+        dia_d = NumericUpDown49.Value / 1000            '[m]
+
+
 
         Double.TryParse(TextBox33.Text, sg_staal)
         g_shaft_a = PI / 4 * dia_a ^ 2 * length_a * sg_staal
         g_shaft_b = PI / 4 * dia_b ^ 2 * length_b * sg_staal
         g_shaft_c = PI / 4 * dia_c ^ 2 * length_c * sg_staal
         gewicht_as = g_shaft_a + g_shaft_b + g_shaft_c
+        g_as_tussen_lagers = PI / 4 * dia_d ^ 2 * (length_d + length_e) * sg_staal
 
         Double.TryParse(TextBox374.Text, gewicht_waaier)
         gewicht_pulley = NumericUpDown30.Value
@@ -2836,7 +2835,7 @@ Public Class Form1
         TextBox194.Text = Round(J_shaft_c, 2).ToString          'Massa traagheid (0.5*M*R^2)
         TextBox41.Text = Round(J_shaft_total, 2).ToString       'Massa traagheid (0.5*M*R^2)
 
-        '----------- Present gewicht------------------
+        '----------- Present gewicht overhung------------------
         TextBox46.Text = Round(g_shaft_a, 1).ToString
         TextBox48.Text = Round(g_shaft_b, 1).ToString
         TextBox52.Text = Round(g_shaft_c, 1).ToString
@@ -2845,6 +2844,9 @@ Public Class Form1
         TextBox193.Text = TextBox52.Text
         TextBox190.Text = Round(gewicht_as, 0).ToString
         TextBox102.Text = Round(g_shaft_a + g_shaft_b + g_shaft_c + gewicht_naaf + gewicht_pulley, 1).ToString 'Totaal gewicht impellar
+
+        '----------- Present gewicht tussen de lagers------------------
+        TextBox220.Text = Round(g_as_tussen_lagers, 1).ToString
 
         '--------------- krachten---------------
         TextBox97.Text = Round(F_onbalans, 0).ToString      'Force inbalans
@@ -3392,7 +3394,7 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click, CheckBox6.CheckedChanged, CheckBox3.CheckedChanged, NumericUpDown9.ValueChanged, NumericUpDown10.ValueChanged, CheckBox7.CheckedChanged, CheckBox8.CheckedChanged, CheckBox10.CheckedChanged, CheckBox13.CheckedChanged, CheckBox14.CheckedChanged, CheckBox16.CheckedChanged
+    Private Sub Button11_Click(sender As Object, e As EventArgs) Handles Button11.Click, CheckBox6.CheckedChanged, CheckBox3.CheckedChanged, NumericUpDown9.ValueChanged, NumericUpDown10.ValueChanged, CheckBox7.CheckedChanged, CheckBox8.CheckedChanged, CheckBox10.CheckedChanged, CheckBox13.CheckedChanged, CheckBox14.CheckedChanged, CheckBox16.CheckedChanged, NumericUpDown56.ValueChanged
         NumericUpDown33.Value = NumericUpDown9.Value
         If NumericUpDown33.Value > 2300 Then
             NumericUpDown33.BackColor = Color.Red
@@ -3613,6 +3615,7 @@ Public Class Form1
         Dim oTable As Word.Table
         Dim oPara1, oPara2, oPara4 As Word.Paragraph
         Dim row As Integer
+        Dim ufilename As String
 
         'Start Word and open the document template. 
         oWord = CreateObject("Word.Application")
@@ -3625,12 +3628,12 @@ Public Class Form1
         oPara1.Range.Font.Name = "Arial"
         oPara1.Range.Font.Size = 16
         oPara1.Range.Font.Bold = True
-        oPara1.Format.SpaceAfter = 2                '24 pt spacing after paragraph. 
+        oPara1.Format.SpaceAfter = 0.5                '24 pt spacing after paragraph. 
         oPara1.Range.InsertParagraphAfter()
 
         oPara2 = oDoc.Content.Paragraphs.Add(oDoc.Bookmarks.Item("\endofdoc").Range)
         oPara2.Range.Font.Size = 11
-        oPara2.Format.SpaceAfter = 1
+        oPara2.Format.SpaceAfter = 0.5
         oPara2.Range.Font.Bold = False
         oPara2.Range.Text = "This torsional analyses is (API-673) based on the Holzer method" & vbCrLf
         oPara2.Range.InsertParagraphAfter()
@@ -3638,7 +3641,7 @@ Public Class Form1
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
         oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 4, 2)
-        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable.Range.ParagraphFormat.SpaceAfter = 0.5
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
         oTable.Rows.Item(1).Range.Font.Bold = True
@@ -3659,7 +3662,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a 14 x 5 table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 18, 5)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 15, 5)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
@@ -3772,6 +3775,11 @@ Public Class Form1
         'oPara4.Range.InlineShapes.Item(1).Width = 400
         oPara4.Range.InsertParagraphAfter()
 
+        ufilename = "N:\Engineering\VBasic\Rapport_copy\Torsie_report_" & DateTime.Now.ToString("yyyy_MM_dd__HH_mm_ss") & ".docx"
+
+        If Directory.Exists("N:\Engineering\VBasic\Rapport_copy") Then
+            oWord.ActiveDocument.SaveAs(ufilename)
+        End If
     End Sub
     'Bearing calculation
     Private Sub Button13_Click(sender As Object, e As EventArgs) Handles Button13.Click, RadioButton24.CheckedChanged, RadioButton22.CheckedChanged, RadioButton19.CheckedChanged, RadioButton17.Click, NumericUpDown69.ValueChanged, TabPage13.Enter, NumericUpDown62.ValueChanged, NumericUpDown61.ValueChanged, ComboBox8.SelectedIndexChanged, NumericUpDown63.ValueChanged, NumericUpDown59.ValueChanged, RadioButton23.CheckedChanged, RadioButton18.CheckedChanged, NumericUpDown57.ValueChanged, RadioButton25.Click, RadioButton26.CheckedChanged, RadioButton27.CheckedChanged, RadioButton28.CheckedChanged
@@ -4184,7 +4192,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 4, 2)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 5, 2)
         oTable.Range.ParagraphFormat.SpaceAfter = 1
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
@@ -4198,8 +4206,8 @@ Public Class Form1
         oTable.Cell(3, 2).Range.Text = Environment.UserName
         oTable.Cell(4, 1).Range.Text = "Date "
         oTable.Cell(4, 2).Range.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-        oTable.Cell(5, 1).Range.Text = ""
-        oTable.Cell(6, 1).Range.Text = ""
+        oTable.Cell(5, 1).Range.Text = "Fan type"
+        oTable.Cell(5, 2).Range.Text = Label1.Text
 
         oTable.Columns(1).Width = oWord.InchesToPoints(2.5)   'Change width of columns 1 & 2.
         oTable.Columns(2).Width = oWord.InchesToPoints(2)
@@ -4368,7 +4376,7 @@ Public Class Form1
         oPara1.Range.Font.Name = "Arial"
         oPara1.Range.Font.Size = 16
         oPara1.Range.Font.Bold = True
-        oPara1.Format.SpaceAfter = 2                '24 pt spacing after paragraph. 
+        oPara1.Format.SpaceAfter = 1                '24 pt spacing after paragraph. 
         oPara1.Range.InsertParagraphAfter()
 
         oPara2 = oDoc.Content.Paragraphs.Add(oDoc.Bookmarks.Item("\endofdoc").Range)
@@ -4380,8 +4388,8 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 4, 2)
-        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 5, 2)
+        oTable.Range.ParagraphFormat.SpaceAfter = 0.5
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
         oTable.Rows.Item(1).Range.Font.Bold = True
@@ -4394,6 +4402,8 @@ Public Class Form1
         oTable.Cell(3, 2).Range.Text = Environment.UserName
         oTable.Cell(4, 1).Range.Text = "Date"
         oTable.Cell(4, 2).Range.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        oTable.Cell(5, 1).Range.Text = "Fan type"
+        oTable.Cell(5, 2).Range.Text = Label1.Text
 
         oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
         oTable.Columns(2).Width = oWord.InchesToPoints(2)
@@ -4402,8 +4412,8 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 6, 3)
-        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 9, 3)
+        oTable.Range.ParagraphFormat.SpaceAfter = 0.5
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
         row = 1
@@ -4415,12 +4425,20 @@ Public Class Form1
         oTable.Cell(row, 3).Range.Text = "[kW]"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Fan power @ max speed"
-        oTable.Cell(row, 2).Range.Text = TextBox214.Text
+        oTable.Cell(row, 2).Range.Text = TextBox393.Text
         oTable.Cell(row, 3).Range.Text = "[kW]"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Motor rated Speed"
         oTable.Cell(row, 2).Range.Text = TextBox195.Text
         oTable.Cell(row, 3).Range.Text = "[rpm]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Voltage"
+        oTable.Cell(row, 2).Range.Text = "440/6000 "
+        oTable.Cell(row, 3).Range.Text = "[V]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Frequency"
+        oTable.Cell(row, 2).Range.Text = "50/60 "
+        oTable.Cell(row, 3).Range.Text = "[Hz]"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Starting method"
         oTable.Cell(row, 2).Range.Text = "DOL/VSD"
@@ -4428,34 +4446,51 @@ Public Class Form1
         oTable.Cell(row, 1).Range.Text = "Inertia Fan Impeller "
         oTable.Cell(row, 2).Range.Text = TextBox202.Text
         oTable.Cell(row, 3).Range.Text = "[kg.m2]"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Fan Load"
+        oTable.Cell(row, 2).Range.Text = "Torque = 1.05 n^2 + 5.46n + 11.1"
+        oTable.Cell(row, 3).Range.Text = "[%,%]"
 
         oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
-        oTable.Columns(2).Width = oWord.InchesToPoints(1.3)
+        oTable.Columns(2).Width = oWord.InchesToPoints(2.3)
         oTable.Columns(3).Width = oWord.InchesToPoints(0.8)
         oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
 
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 12, 2)
-        oTable.Range.ParagraphFormat.SpaceAfter = 1
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 17, 2)
+        oTable.Range.ParagraphFormat.SpaceAfter = 0.5
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
         row = 1
         oTable.Rows.Item(row).Range.Font.Bold = True
         oTable.Cell(row, 1).Range.Text = "Specifications"
+
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Voltage"
-        oTable.Cell(row, 2).Range.Text = ". [V] "
+        oTable.Cell(row, 1).Range.Text = "Location"
+        oTable.Cell(row, 2).Range.Text = "outdoor/indoor "
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Frequency"
-        oTable.Cell(row, 2).Range.Text = "50/60 [Hz]"
+        oTable.Cell(row, 1).Range.Text = "Ambient temp"
+        oTable.Cell(row, 2).Range.Text = ".. celsius"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Insulation Class"
+        oTable.Cell(row, 2).Range.Text = "F/..... "
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Temperature rise Class"
+        oTable.Cell(row, 2).Range.Text = "B/......."
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Area class. motor"
+        oTable.Cell(row, 2).Range.Text = "Zone .., temp class....., type of enclosure protection:  "
         row += 1
         oTable.Cell(row, 1).Range.Text = "Bearings"
         oTable.Cell(row, 2).Range.Text = "anti friction/Hydrostatic "
         row += 1
         oTable.Cell(row, 1).Range.Text = "Heater"
         oTable.Cell(row, 2).Range.Text = "Yes/No"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Protection degree"
+        oTable.Cell(row, 2).Range.Text = "IP55"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Coil temperature"
         oTable.Cell(row, 2).Range.Text = "Pt100"
@@ -4469,13 +4504,20 @@ Public Class Form1
         oTable.Cell(row, 1).Range.Text = "Starting"
         oTable.Cell(row, 2).Range.Text = "TBA per hour"
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Ambient temp"
-        oTable.Cell(row, 2).Range.Text = ".. celsius"
-
+        oTable.Cell(row, 1).Range.Text = "Paint system/color"
+        oTable.Cell(row, 2).Range.Text = "........./RAL....."
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Instruments"
+        oTable.Cell(row, 2).Range.Text = ".............."
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Accessories"
+        oTable.Cell(row, 2).Range.Text = "canopy/ jacking bolts"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Tests"
+        oTable.Cell(row, 2).Range.Text = "Performance/Type"
 
         oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
-        oTable.Columns(2).Width = oWord.InchesToPoints(2.3)
-
+        oTable.Columns(2).Width = oWord.InchesToPoints(3.3)
         oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
 
 
@@ -4494,12 +4536,11 @@ Public Class Form1
             GroupBox12.Text = "File saved at " & ufilename
             oWord.ActiveDocument.SaveAs(ufilename)
         End If
+
     End Sub
 
-    Private Sub calc_emotor_4P()
-        'see http://ecatalog.weg.net/files/wegnet/WEG-specification-of-electric-motors-50039409-manual-english.pdf
-        'see http://electrical-engineering-portal.com/calculation-of-motor-starting-time-as-first-approximation
-        Dim Ins_power, required_power, required_power_savety, aanlooptijd, n_actual, rad, shaft_power As Double
+    Private Sub calc_emotor_4P()        '
+        Dim Ins_power, required_power, required_power_savety, aanlooptijd, n_actual, rad As Double
         Dim m_torque_inrush, m_torque_max, m_torque_rated, m_torque_average As Double
         Dim impellar_inertia, motor_inertia, total_inertia As Double
         Dim ang_acceleration, C_acc, inertia_torque, fan_load_torque As Double
@@ -4515,6 +4556,8 @@ Public Class Form1
             Select Case True                        'Toerental motor [rpm] 50 Hz
                 Case RadioButton30.Checked
                     n_actual = 3000
+        'see http://ecatalog.weg.net/files/wegnet/WEG-specification-of-electric-motors-50039409-manual-english.pdf
+        'see http://electrical-engineering-portal.com/calculation-of-motor-startin
                 Case RadioButton29.Checked
                     n_actual = 1500
                 Case RadioButton31.Checked
@@ -4637,9 +4680,9 @@ Public Class Form1
             'yas (T) 0-100% torque
             'y=c.(x-a)^2+b
 
-            c = 0.011   'Breedte parabool
-            b = 8       'Vertikale verschuiving
-            a = 8       'Horizontale Verschuiving
+            c = 0.0135  'Breedte parabool
+            b = 4       'Vertikale verschuiving
+            a = 16      'Horizontale Verschuiving
 
             For x = 0 To 100
                 y = c * (x - a) ^ 2 + b
