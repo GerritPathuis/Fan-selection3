@@ -1266,7 +1266,9 @@ Public Class Form1
         TextBox94.Text = Round(Voorplaat_gewicht, 1).ToString
 
         TextBox192.Text = Round(Waaier_as_gewicht, 0).ToString
+
         TextBox96.Text = Round(Waaier_as_gewicht, 1).ToString
+
         TextBox103.Text = Round(Voorplaat_keel * 1000, 0).ToString
         TextBox104.Text = Round(Sch_lengte * 1000, 0).ToString
 
@@ -2553,7 +2555,7 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown27.ValueChanged, NumericUpDown26.ValueChanged, NumericUpDown25.ValueChanged, NumericUpDown24.ValueChanged, NumericUpDown23.ValueChanged, NumericUpDown22.ValueChanged, TabPage5.Enter, NumericUpDown16.ValueChanged, ComboBox4.SelectedIndexChanged, RadioButton7.CheckedChanged, NumericUpDown15.ValueChanged, NumericUpDown46.ValueChanged, NumericUpDown45.ValueChanged, NumericUpDown44.ValueChanged, NumericUpDown43.ValueChanged, NumericUpDown48.ValueChanged
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown27.ValueChanged, NumericUpDown26.ValueChanged, NumericUpDown25.ValueChanged, NumericUpDown24.ValueChanged, NumericUpDown23.ValueChanged, NumericUpDown22.ValueChanged, TabPage5.Enter, NumericUpDown16.ValueChanged, ComboBox4.SelectedIndexChanged, RadioButton7.CheckedChanged, NumericUpDown15.ValueChanged, NumericUpDown46.ValueChanged, NumericUpDown45.ValueChanged, NumericUpDown44.ValueChanged, NumericUpDown43.ValueChanged, NumericUpDown48.ValueChanged, NumericUpDown86.ValueChanged, NumericUpDown85.ValueChanged, NumericUpDown49.ValueChanged, RadioButton10.CheckedChanged
         calc_bearing_belts()
         Torsional_stiffness()
         Torsional_analyses()
@@ -2567,6 +2569,8 @@ Public Class Form1
 
         g_modulus = 79.3 * 10 ^ 9           '[Pa] (kilo, mega, giga) steel shear modulus !
 
+
+        '-------------- Overhung ----------------------------
         section(0).dia = NumericUpDown25.Value / 1000
         section(0).length = NumericUpDown22.Value / 1000
         section(0).k_stiffness = PI * g_modulus * section(0).dia ^ 4 / (32 * section(0).length)     '[Nm/rad]
@@ -2581,11 +2585,27 @@ Public Class Form1
 
         k_total = 1 / (1 / section(0).k_stiffness + 1 / section(1).k_stiffness + 1 / section(2).k_stiffness)
 
+        '-------------- Tussen de lagers ----------------------------
+        section(3).dia = NumericUpDown49.Value / 1000
+        section(3).length = NumericUpDown85.Value / 1000               'Length drive side only
+        section(3).k_stiffness = PI * g_modulus * section(3).dia ^ 4 / (32 * section(3).length)     '[Nm/rad]
+
+
         If Not Double.IsNaN(k_total) And Not Double.IsInfinity(k_total) Then   'preventing NaN problem and infinity problems
+            '---------- overhung ----------------
             TextBox66.Text = Round(k_total, 0).ToString
-            TextBox259.Text = Round(k_total, 0).ToString
-            TextBox258.Text = Round(k_total * PI / 180, 0).ToString       'Drive shaft, Convert rad to degree
+            '---------- tussen de lagers ----------------
+            TextBox394.Text = Round(section(3).k_stiffness, 0).ToString
+
+            If RadioButton10.Checked Then
+                TextBox259.Text = Round(k_total, 0).ToString
+                TextBox258.Text = Round(k_total * PI / 180, 0).ToString       'Drive shaft, Convert rad to degree
+            Else
+                TextBox259.Text = Round(section(3).k_stiffness, 0).ToString
+                TextBox258.Text = Round(section(3).k_stiffness * PI / 180, 0).ToString       'Drive shaft, Convert rad to degree
+            End If
         End If
+
 
     End Sub
 
@@ -2741,7 +2761,6 @@ Public Class Form1
         dia_d = NumericUpDown49.Value / 1000            '[m]
 
 
-
         Double.TryParse(TextBox33.Text, sg_staal)
         g_shaft_a = PI / 4 * dia_a ^ 2 * length_a * sg_staal
         g_shaft_b = PI / 4 * dia_b ^ 2 * length_b * sg_staal
@@ -2836,17 +2855,16 @@ Public Class Form1
         TextBox41.Text = Round(J_shaft_total, 2).ToString       'Massa traagheid (0.5*M*R^2)
 
         '----------- Present gewicht overhung------------------
-        TextBox46.Text = Round(g_shaft_a, 1).ToString
-        TextBox48.Text = Round(g_shaft_b, 1).ToString
-        TextBox52.Text = Round(g_shaft_c, 1).ToString
-        TextBox189.Text = TextBox46.Text
-        TextBox191.Text = TextBox48.Text
-        TextBox193.Text = TextBox52.Text
+        TextBox52.Text = Round(gewicht_as, 0).ToString
         TextBox190.Text = Round(gewicht_as, 0).ToString
-        TextBox102.Text = Round(g_shaft_a + g_shaft_b + g_shaft_c + gewicht_naaf + gewicht_pulley, 1).ToString 'Totaal gewicht impellar
-
+        TextBox193.Text = TextBox52.Text
+        If RadioButton10.Checked Then
+            TextBox102.Text = Round(gewicht_as + gewicht_naaf + gewicht_pulley, 1).ToString 'Totaal gewicht impellar
+        Else
+            TextBox102.Text = Round(g_as_tussen_lagers + gewicht_naaf + gewicht_pulley, 1).ToString 'Totaal gewicht impellar
+        End If
         '----------- Present gewicht tussen de lagers------------------
-        TextBox220.Text = Round(g_as_tussen_lagers, 1).ToString
+        TextBox220.Text = Round(g_as_tussen_lagers, 0).ToString
 
         '--------------- krachten---------------
         TextBox97.Text = Round(F_onbalans, 0).ToString      'Force inbalans
@@ -4412,7 +4430,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 9, 3)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 10, 3)
         oTable.Range.ParagraphFormat.SpaceAfter = 0.5
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
@@ -4440,6 +4458,10 @@ Public Class Form1
         oTable.Cell(row, 2).Range.Text = "50/60 "
         oTable.Cell(row, 3).Range.Text = "[Hz]"
         row += 1
+        oTable.Cell(row, 1).Range.Text = "Bounting"
+        oTable.Cell(row, 2).Range.Text = "B3"
+        oTable.Cell(row, 3).Range.Text = "[-]"
+        row += 1
         oTable.Cell(row, 1).Range.Text = "Starting method"
         oTable.Cell(row, 2).Range.Text = "DOL/VSD"
         row += 1
@@ -4459,7 +4481,7 @@ Public Class Form1
 
         '----------------------------------------------
         'Insert a table, fill it with data and change the column widths.
-        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 17, 2)
+        oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 21, 2)
         oTable.Range.ParagraphFormat.SpaceAfter = 0.5
         oTable.Range.Font.Size = 9
         oTable.Range.Font.Bold = False
@@ -4469,10 +4491,10 @@ Public Class Form1
 
         row += 1
         oTable.Cell(row, 1).Range.Text = "Location"
-        oTable.Cell(row, 2).Range.Text = "outdoor/indoor "
+        oTable.Cell(row, 2).Range.Text = "Outdoor"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Ambient temp"
-        oTable.Cell(row, 2).Range.Text = ".. celsius"
+        oTable.Cell(row, 2).Range.Text = "Min. 0°c / Max. 55°c"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Insulation Class"
         oTable.Cell(row, 2).Range.Text = "F/..... "
@@ -4480,23 +4502,35 @@ Public Class Form1
         oTable.Cell(row, 1).Range.Text = "Temperature rise Class"
         oTable.Cell(row, 2).Range.Text = "B/......."
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Area class. motor"
+        oTable.Cell(row, 1).Range.Text = "Internal paint"
+        oTable.Cell(row, 2).Range.Text = "Tropicalized"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Duty Cycle"
+        oTable.Cell(row, 2).Range.Text = "S1 continuous"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Service factor"
+        oTable.Cell(row, 2).Range.Text = "1.0"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "ATEX"
         oTable.Cell(row, 2).Range.Text = "Zone .., temp class....., type of enclosure protection:  "
         row += 1
         oTable.Cell(row, 1).Range.Text = "Bearings"
-        oTable.Cell(row, 2).Range.Text = "anti friction/Hydrostatic "
+        oTable.Cell(row, 2).Range.Text = "Anti friction/Hydrostatic "
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Heater"
+        oTable.Cell(row, 1).Range.Text = "Space Heater"
         oTable.Cell(row, 2).Range.Text = "Yes/No"
+        row += 1
+        oTable.Cell(row, 1).Range.Text = "Enclosure"
+        oTable.Cell(row, 2).Range.Text = "Cast Iron"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Protection degree"
         oTable.Cell(row, 2).Range.Text = "IP55"
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Coil temperature"
-        oTable.Cell(row, 2).Range.Text = "Pt100"
+        oTable.Cell(row, 1).Range.Text = "Coil temperature (6x)"
+        oTable.Cell(row, 2).Range.Text = "Pt100 (3-cable)"
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Bearing temp. (2x)"
-        oTable.Cell(row, 2).Range.Text = "Pt100"
+        oTable.Cell(row, 1).Range.Text = "Bearing cap temp(2x)"
+        oTable.Cell(row, 2).Range.Text = "Pt100 (3-cable)"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Segrated terminal boxes"
         oTable.Cell(row, 2).Range.Text = "Power-heater-coil temperature"
@@ -4514,7 +4548,7 @@ Public Class Form1
         oTable.Cell(row, 2).Range.Text = "canopy/ jacking bolts"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Tests"
-        oTable.Cell(row, 2).Range.Text = "Performance/Type"
+        oTable.Cell(row, 2).Range.Text = "Performance/Type/Witnessed"
 
         oTable.Columns(1).Width = oWord.InchesToPoints(2.0)   'Change width of columns 1 & 2.
         oTable.Columns(2).Width = oWord.InchesToPoints(3.3)
