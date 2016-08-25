@@ -1896,7 +1896,7 @@ Public Class Form1
                     Chart1.Series(13).Points(25).Label = "Vane Control Angles for Indication only" & vbCrLf      'Add Remark 
                     Chart1.Series(13).Points(25).Label &= "Follow the system resistance line" & vbCrLf
                     Chart1.Series(13).Points(25).Label &= "Save operation area is between 60 and 100% Flow" & vbCrLf
-                    Chart1.Series(13).Points(25).Label &= "Below 60% flow expect surging"
+                    Chart1.Series(13).Points(25).Label &= "Below 60 degree angle surging !!"
                 End If
 
                 '------------ Now present the IVC power lines-------------------------
