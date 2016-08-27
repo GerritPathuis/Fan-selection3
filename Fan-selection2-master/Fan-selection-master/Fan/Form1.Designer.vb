@@ -920,6 +920,8 @@ Partial Class Form1
         Me.Label202 = New System.Windows.Forms.Label()
         Me.Button9 = New System.Windows.Forms.Button()
         Me.GroupBox27 = New System.Windows.Forms.GroupBox()
+        Me.TextBox359 = New System.Windows.Forms.TextBox()
+        Me.Label176 = New System.Windows.Forms.Label()
         Me.Label254 = New System.Windows.Forms.Label()
         Me.TextBox205 = New System.Windows.Forms.TextBox()
         Me.Label197 = New System.Windows.Forms.Label()
@@ -11222,6 +11224,8 @@ Partial Class Form1
         '
         'GroupBox27
         '
+        Me.GroupBox27.Controls.Add(Me.TextBox359)
+        Me.GroupBox27.Controls.Add(Me.Label176)
         Me.GroupBox27.Controls.Add(Me.Label254)
         Me.GroupBox27.Controls.Add(Me.TextBox205)
         Me.GroupBox27.Controls.Add(Me.Label197)
@@ -11230,17 +11234,39 @@ Partial Class Form1
         Me.GroupBox27.Controls.Add(Me.TextBox146)
         Me.GroupBox27.Location = New System.Drawing.Point(843, 14)
         Me.GroupBox27.Name = "GroupBox27"
-        Me.GroupBox27.Size = New System.Drawing.Size(402, 136)
+        Me.GroupBox27.Size = New System.Drawing.Size(402, 175)
         Me.GroupBox27.TabIndex = 34
         Me.GroupBox27.TabStop = False
         Me.GroupBox27.Text = "Aanlooptijd DOL"
+        '
+        'TextBox359
+        '
+        Me.TextBox359.BackColor = System.Drawing.SystemColors.Window
+        Me.TextBox359.Enabled = False
+        Me.TextBox359.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TextBox359.Location = New System.Drawing.Point(317, 85)
+        Me.TextBox359.Name = "TextBox359"
+        Me.TextBox359.Size = New System.Drawing.Size(56, 20)
+        Me.TextBox359.TabIndex = 148
+        Me.TextBox359.Text = "0"
+        Me.TextBox359.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
+        'Label176
+        '
+        Me.Label176.AutoSize = True
+        Me.Label176.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label176.Location = New System.Drawing.Point(16, 85)
+        Me.Label176.Name = "Label176"
+        Me.Label176.Size = New System.Drawing.Size(277, 18)
+        Me.Label176.TabIndex = 147
+        Me.Label176.Text = "Run-up time closed discharge U=80% [s]"
         '
         'Label254
         '
         Me.Label254.AutoSize = True
         Me.Label254.BackColor = System.Drawing.Color.OrangeRed
         Me.Label254.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label254.Location = New System.Drawing.Point(16, 86)
+        Me.Label254.Location = New System.Drawing.Point(16, 114)
         Me.Label254.Name = "Label254"
         Me.Label254.Size = New System.Drawing.Size(108, 18)
         Me.Label254.TabIndex = 146
@@ -11270,7 +11296,7 @@ Partial Class Form1
         'Label196
         '
         Me.Label196.AutoSize = True
-        Me.Label196.Location = New System.Drawing.Point(16, 111)
+        Me.Label196.Location = New System.Drawing.Point(16, 145)
         Me.Label196.Name = "Label196"
         Me.Label196.Size = New System.Drawing.Size(235, 13)
         Me.Label196.TabIndex = 143
@@ -11282,9 +11308,9 @@ Partial Class Form1
         Me.Label214.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label214.Location = New System.Drawing.Point(16, 59)
         Me.Label214.Name = "Label214"
-        Me.Label214.Size = New System.Drawing.Size(255, 18)
+        Me.Label214.Size = New System.Drawing.Size(285, 18)
         Me.Label214.TabIndex = 103
-        Me.Label214.Text = "Aanlooptijd altijd met gesloten pers [s]"
+        Me.Label214.Text = "Run-up time closed discharge U=100% [s]"
         '
         'TextBox146
         '
@@ -14335,4 +14361,6 @@ Partial Class Form1
     Friend WithEvents TextBox48 As TextBox
     Friend WithEvents TextBox52 As TextBox
     Friend WithEvents GroupBox67 As GroupBox
+    Friend WithEvents TextBox359 As TextBox
+    Friend WithEvents Label176 As Label
 End Class

@@ -4462,7 +4462,7 @@ Public Class Form1
         oTable.Cell(row, 2).Range.Text = "50/60 "
         oTable.Cell(row, 3).Range.Text = "[Hz]"
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Bounting"
+        oTable.Cell(row, 1).Range.Text = "Mounting"
         oTable.Cell(row, 2).Range.Text = "B3"
         oTable.Cell(row, 3).Range.Text = "[-]"
         row += 1
@@ -4527,7 +4527,7 @@ Public Class Form1
         oTable.Cell(row, 1).Range.Text = "Enclosure"
         oTable.Cell(row, 2).Range.Text = "Cast Iron"
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Protection degree"
+        oTable.Cell(row, 1).Range.Text = "Ingress Protection"
         oTable.Cell(row, 2).Range.Text = "IP55"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Coil temperature (6x)"
@@ -4549,7 +4549,7 @@ Public Class Form1
         oTable.Cell(row, 2).Range.Text = ".............."
         row += 1
         oTable.Cell(row, 1).Range.Text = "Accessories"
-        oTable.Cell(row, 2).Range.Text = "canopy/ jacking bolts"
+        oTable.Cell(row, 2).Range.Text = "Canopy/ jacking bolts"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Tests"
         oTable.Cell(row, 2).Range.Text = "Performance/Type/Witnessed"
@@ -4656,7 +4656,8 @@ Public Class Form1
         TextBox214.Text = Round(required_power / 1000, 0).ToString      'Fan power @ max speed [kw]
         TextBox393.Text = Round(required_power_savety / 1000, 0).ToString          'Fan power @ max speed [kw]+savety
         TextBox215.Text = Round(fan_load_torque, 0).ToString            'Fan torque @ max speed [N.m]
-        TextBox146.Text = Round(aanlooptijd, 1).ToString                'Aanlooptijd [s]
+        TextBox146.Text = Round(aanlooptijd, 1).ToString                'Aanlooptijd U=100% [s]
+        TextBox359.Text = Round(aanlooptijd * 2.28, 1).ToString         'Aanlooptijd U=80% [s]
 
         '------- check geinstalleerd vermogen --------------------
         If (Ins_power < required_power_savety) Then
@@ -4670,8 +4671,10 @@ Public Class Form1
         '------- check aanlooptijd --------------------
         If aanlooptijd > 45 Or aanlooptijd <= 0 Then
             TextBox146.BackColor = Color.Red
+            TextBox359.BackColor = Color.Red
         Else
             TextBox146.BackColor = Color.LightGreen
+            TextBox359.BackColor = Color.LightGreen
         End If
 
         '------- check koppel --------------------
