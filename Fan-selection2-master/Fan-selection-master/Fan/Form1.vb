@@ -1004,7 +1004,7 @@ Public Class Form1
         Dim maxrpm As Double
         Dim maxV As Double
         Dim sigma_allowed As Double
-        Dim Waaier_dia, Waaier_dik, Waaier_as_gewicht, las_gewicht As Double   'Zonder naaf
+        Dim Waaier_dia, Waaier_dik, las_gewicht As Double   'Zonder naaf
         Dim labyrinth_gewicht As Double
         Dim Sch_breed As Double                                             'Schoep breed
         Dim Sch_dik, Sch_hoek, Sch_lengte, Plaat_Sch_gewicht As Double            'Schoep_dik, Schoep_lang
@@ -1107,22 +1107,19 @@ Public Class Form1
             GroupBox30.Visible = False
             Waaier_gewicht = Bodem_gewicht + Plaat_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + las_gewicht    'Gewicht tbv N_krit
             Waaier_gewicht *= NumericUpDown40.Value             'Aantal waaiers
-            Waaier_as_gewicht = Waaier_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley     'totaal gewicht
-            If RadioButton6.Checked Then                'Dubbelzijdige aanzuiging
+            If RadioButton6.Checked Then                        'Dubbelzijdige aanzuiging
                 Waaier_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
-                Waaier_as_gewicht += Plaat_schoepen_gewicht + Voorplaat_gewicht
             End If
         Else                            'Airfoil schoepen
             GroupBox4.Visible = False
             GroupBox30.Visible = True
             Waaier_gewicht = Bodem_gewicht + airf_schoepen_gewicht + labyrinth_gewicht + Voorplaat_gewicht + las_gewicht     'Gewicht tbv N_krit
-            Waaier_gewicht *= NumericUpDown40.Value                                             'Aantal waaiers
-            Waaier_as_gewicht = Waaier_gewicht + gewicht_as + gewicht_naaf + gewicht_pulley + las_gewicht     'totaal gewicht
-            If RadioButton6.Checked Then                'Dubbelzijdige aanzuiging
-                Waaier_as_gewicht += airf_schoepen_gewicht + Voorplaat_gewicht
+            Waaier_gewicht *= NumericUpDown40.Value             'Aantal waaiers
+            If RadioButton6.Checked Then                        'Dubbelzijdige aanzuiging
                 Waaier_gewicht += airf_schoepen_gewicht + Voorplaat_gewicht
             End If
         End If
+        Waaier_gewicht += gewicht_naaf
 
         '--------max toerental (beide zijden ingeklemd)-----------
         maxrpm = 0.32 * Sqrt(sigma_allowed * Sch_dik / (sg_staal * Waaier_dia * Sch_breed ^ 2 * Cos(Sch_hoek * PI / 180)))
@@ -1260,8 +1257,9 @@ Public Class Form1
         TextBox45.Text = Round(Bodem_gewicht, 1).ToString
         TextBox94.Text = Round(Voorplaat_gewicht, 1).ToString
 
-        TextBox192.Text = Round(Waaier_as_gewicht, 0).ToString
-        TextBox96.Text = Round(Waaier_as_gewicht, 1).ToString
+        'TextBox192.Text = Round(Waaier_as_gewicht, 0).ToString
+        TextBox96.Text = Round(Waaier_gewicht, 0).ToString
+        '   TextBox360.Text = Round(som, 0).ToString
 
         TextBox103.Text = Round(Voorplaat_keel * 1000, 0).ToString
         TextBox104.Text = Round(Sch_lengte * 1000, 0).ToString
@@ -1282,7 +1280,7 @@ Public Class Form1
         End If
 
         TextBox92.Text = Round(J_naaf, 2).ToString          'Massa traagheid (0.5*M*R^2)
-        TextBox109.Text = Round(J_tot, 1).ToString          'Massa traagheid Totaal
+        'TextBox109.Text = Round(J_tot, 1).ToString          'Massa traagheid Totaal
         TextBox392.Text = Round(J_Campbell, 1).ToString     'Massa traagheid waaiers tbv Campbell
 
         NumericUpDown45.Value = Round(J_tot, 1).ToString
@@ -2549,7 +2547,7 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown27.ValueChanged, NumericUpDown26.ValueChanged, NumericUpDown25.ValueChanged, NumericUpDown24.ValueChanged, NumericUpDown23.ValueChanged, NumericUpDown22.ValueChanged, TabPage5.Enter, NumericUpDown16.ValueChanged, ComboBox4.SelectedIndexChanged, RadioButton7.CheckedChanged, NumericUpDown15.ValueChanged, NumericUpDown46.ValueChanged, NumericUpDown45.ValueChanged, NumericUpDown44.ValueChanged, NumericUpDown43.ValueChanged, NumericUpDown48.ValueChanged, NumericUpDown86.ValueChanged, NumericUpDown85.ValueChanged, NumericUpDown49.ValueChanged, RadioButton10.CheckedChanged
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown27.ValueChanged, NumericUpDown26.ValueChanged, NumericUpDown25.ValueChanged, NumericUpDown24.ValueChanged, NumericUpDown23.ValueChanged, NumericUpDown22.ValueChanged, TabPage5.Enter, ComboBox4.SelectedIndexChanged, NumericUpDown15.ValueChanged, NumericUpDown46.ValueChanged, NumericUpDown45.ValueChanged, NumericUpDown44.ValueChanged, NumericUpDown43.ValueChanged, NumericUpDown48.ValueChanged, NumericUpDown86.ValueChanged, NumericUpDown85.ValueChanged, NumericUpDown49.ValueChanged, RadioButton10.CheckedChanged
         calc_bearing_belts()
         Torsional_stiffness()
         Torsional_analyses()
@@ -2562,7 +2560,6 @@ Public Class Form1
         TextBox257.Text = Round(NumericUpDown44.Value * PI / 180, 0).ToString       'Coupling, Convert rad to degree
 
         g_modulus = 79.3 * 10 ^ 9           '[Pa] (kilo, mega, giga) steel shear modulus !
-
 
         '-------------- Overhung ----------------------------
         section(0).dia = NumericUpDown25.Value / 1000
@@ -2719,9 +2716,10 @@ Public Class Form1
         Dim dia_a, dia_b, dia_c, dia_d, dia_naaf As Double
         Dim g_shaft_a, g_shaft_b, g_shaft_c, sg_staal As Double
         Dim J_shaft_a, J_shaft_b, J_shaft_c, J_shaft_total, J_shaft_tussenb As Double
+        Dim j_imp, j_rotating As Double
         Dim I_shaft_a, I_shaft_b, I_shaft_c As Double
         Dim gewicht_as, gewicht_waaier, gewicht_pulley, gewicht_naaf, g_as_tussen_lagers As Double
-        Dim Force_combi1, Force_combi2, Force_combi3 As Double
+        Dim Force_combi1, Force_combi2, Force_combi3, Force_combi4 As Double
         Dim N_kritisch_as, N_max_tussen As Double
         Dim N_max_doorbuiging As Double
         Dim n_actual As Double
@@ -2729,29 +2727,32 @@ Public Class Form1
         Dim motor_inertia As Double
         Dim W_rpm As Double
         Dim F_onbalans, V_onbalans, hoeksnelheid As Double
-        Dim F_a_hor, F_a_vert, F_a_combined As Double       'Bearing next impellar
-        Dim F_b_hor, F_b_vert, F_b_combined As Double       'Bearing next coupling
+        Dim F_a_vert As Double       'Bearing next impellar
+        Dim F_b_vert As Double       'Bearing next coupling
         Dim F_axial As Double
-        Dim dia_pulley, S_power, F_snaar, F_scheef As Double
+        Dim S_power As Double
         Dim Waaier_dia, Voorplaat_keel As Double
         Dim dp_stat_tbox_VC As Double                       'dp fan including inletbox and Vane Control
+        Dim som_rot_gewicht As Double                       'som roterend gewicht
 
         Double.TryParse(TextBox385.Text, dp_stat_tbox_VC)
         W_rpm = NumericUpDown19.Value                       'Toerental waaier
         TextBox110.Text = NumericUpDown19.Value.ToString
 
-        length_a = NumericUpDown22.Value / 1000         '[m]
-        length_b = NumericUpDown23.Value / 1000         '[m]
-        length_c = NumericUpDown24.Value / 1000         '[m]
-        length_naaf = NumericUpDown29.Value / 1000      '[m]
-        length_d = NumericUpDown85.Value / 1000         '[m]
-        length_e = NumericUpDown86.Value / 1000         '[m]
-
+        '------------- overhung opstelling ------------
+        length_a = NumericUpDown22.Value / 1000         '[m] overhang waaier
+        length_b = NumericUpDown23.Value / 1000         '[m] tussen de lagers
+        length_c = NumericUpDown24.Value / 1000         '[m] overhang pulley
+        length_naaf = NumericUpDown29.Value / 1000      '[m] lengte naaf
         dia_a = NumericUpDown27.Value / 1000            '[m]
         dia_b = NumericUpDown26.Value / 1000            '[m]
         dia_c = NumericUpDown25.Value / 1000            '[m]
         dia_naaf = NumericUpDown28.Value / 1000         '[m]
-        dia_d = NumericUpDown49.Value / 1000            '[m]
+
+        '------------- tussen de lagers ------------------
+        length_d = NumericUpDown85.Value / 1000         '[m] afstand lagerDE-waaier ()
+        length_e = NumericUpDown86.Value / 1000         '[m] afstand waaier-lagerNDE ()
+        dia_d = NumericUpDown49.Value / 1000            '[m] diameter as
 
         Double.TryParse(TextBox33.Text, sg_staal)
         g_shaft_a = PI / 4 * dia_a ^ 2 * length_a * sg_staal
@@ -2764,18 +2765,33 @@ Public Class Form1
         gewicht_pulley = NumericUpDown30.Value
         gewicht_naaf = PI / 4 * dia_naaf ^ 2 * length_naaf * sg_staal
 
+        '------------- Overhung fan -------------
         I_shaft_a = PI * dia_a ^ 4 / 64                     'OppervlakTraagheid [m4]
         I_shaft_b = PI * dia_b ^ 4 / 64                     'OppervlakTraagheid [m4]
         I_shaft_c = PI * dia_c ^ 4 / 64                     'OppervlakTraagheid [m4]
 
-        '------------- Overhung -------------
+
         J_shaft_a = 0.5 * g_shaft_a * (dia_a / 2) ^ 2       'MassaTraagheid [kg.m2]
         J_shaft_b = 0.5 * g_shaft_b * (dia_b / 2) ^ 2       'MassaTraagheid [kg.m2]
         J_shaft_c = 0.5 * g_shaft_c * (dia_c / 2) ^ 2       'MassaTraagheid [kg.m2]
         J_shaft_total = J_shaft_a + J_shaft_b + J_shaft_c   'MassaTraagheid As
 
-        '------- tussen de lagers --------------
+        '------- tussen de lagers fan --------------
         J_shaft_tussenb = 0.5 * g_as_tussen_lagers * (dia_d / 2) ^ 2       'MassaTraagheid [kg.m2]
+
+        '--------- present --------------
+        Double.TryParse(TextBox392.Text, j_imp)             'traagheid impeller
+
+        If RadioButton10.Checked Then   'Overhung
+            som_rot_gewicht = gewicht_as + gewicht_waaier + gewicht_pulley
+            j_rotating = J_shaft_total + j_imp
+        Else                            'Tussen lagers
+            som_rot_gewicht = g_as_tussen_lagers + gewicht_waaier + gewicht_pulley
+            j_rotating = J_shaft_tussenb + j_imp
+        End If
+
+        TextBox202.Text = Round(j_rotating, 0).ToString
+        TextBox360.Text = Round(som_rot_gewicht, 0).ToString
 
 
         '--Willi Bohl, Ventilatoren, Kritisch toerental formule 6.41 pagina 213--------------
@@ -2796,45 +2812,38 @@ Public Class Form1
 
         '--------- Kracht door V_snaren----------
         If (ComboBox4.SelectedIndex > -1) Then                                  'Prevent exceptions
+
+            '------------- inertia motor--------------------
             Dim words() As String = emotor_4P(ComboBox4.SelectedIndex).Split(";")
             S_power = words(0) * 1000                                           'Motor vermogen
             n_actual = words(1)                                                 'Toerental motor [rpm]
-            dia_pulley = NumericUpDown16.Value / 1000
-            F_snaar = 0.975 * S_power * 20 / (W_rpm * dia_pulley * 0.5)
-
-            '------------- inertia motor--------------------
             motor_inertia = emotor_4P_inert(n_actual, S_power)
             TextBox219.Text = Round(motor_inertia, 1).ToString
             NumericUpDown46.Value = Round(motor_inertia, 1).ToString
         End If
 
-        '--------- Scheefstelling koppeling ---------------
-        F_scheef = 5.7 * Sqrt(S_power / W_rpm)                         '?????????????????????????????
+        ''--------- Scheefstelling koppeling ---------------
+        'F_scheef = 5.7 * Sqrt(S_power / W_rpm)                         '?????????????????????????????
 
         '----------- Forces bearing vertical-------------
-        Force_combi1 = (gewicht_waaier + gewicht_naaf) * 9.81 + F_onbalans
-        Force_combi2 = gewicht_as * 9.81
-        Force_combi3 = gewicht_pulley * 9.81
-
-        F_a_vert = Abs(Force_combi1 * (length_a + length_b) + Force_combi2 * length_b * 0.5 - Force_combi3 * length_c) / length_b
-        F_b_vert = Abs(Force_combi1 * length_a - Force_combi2 * length_b * 0.5 - Force_combi3 * (length_b + length_c)) / length_b
+        Force_combi1 = gewicht_waaier * 9.81 + F_onbalans              'kracht bij waaier
+        Force_combi2 = gewicht_as * 9.81                               'kracht as overhung
+        Force_combi3 = gewicht_pulley * 9.81                           'kracht pulley
+        Force_combi4 = g_as_tussen_lagers * 9.81                       'kracht as tussen de lagers
 
         '----------- Forces bearing horizontal-------------
-        Force_combi1 = 0   ' 
-        Force_combi2 = 0   ' 
-        If RadioButton7.Checked Then    'direct drive
-            Force_combi3 = F_scheef
-            F_snaar = 0
-        Else
-            Force_combi3 = F_snaar
-            F_scheef = 0
-        End If
-        F_a_hor = Abs(Force_combi1 * (length_a + length_b) + Force_combi2 * length_b * 0.5 - Force_combi3 * length_c) / length_b
-        F_b_hor = Abs(Force_combi1 * length_a - Force_combi2 * length_b * 0.5 - Force_combi3 * (length_b + length_c)) / length_b
 
-        '----------- Forces bearing combined-------------
-        F_a_combined = Sqrt(F_a_vert ^ 2 + F_a_hor ^ 2)
-        F_b_combined = Sqrt(F_b_vert ^ 2 + F_b_hor ^ 2)
+
+        '----------- Forces bearing vertikal -------------
+        If RadioButton10.Checked Then   'Overhung
+            F_a_vert = Abs(Force_combi1 * (length_a + length_b) + Force_combi2 * length_b * 0.5 - Force_combi3 * length_c) / length_b
+            F_b_vert = Abs(Force_combi1 * length_a - Force_combi2 * length_b * 0.5 - Force_combi3 * (length_b + length_c)) / length_b
+        Else                            'Tussen de lagers
+            F_a_vert = som_rot_gewicht * 9.81 * length_d / (length_d + length_e)
+            F_b_vert = som_rot_gewicht * 9.81 * length_e / (length_d + length_e)
+        End If
+
+
 
         '--------Axial force Keel diameter------------
         If ComboBox1.SelectedIndex > -1 Then '------- schoepgewicht berekenen-----------
@@ -2843,6 +2852,8 @@ Public Class Form1
             F_axial = PI / 4 * Voorplaat_keel ^ 2 * dp_static_inletbox_VC * 100
         End If
         ' MessageBox.Show("Voorplaat_keel=" & Voorplaat_keel.ToString &"  F_b_hor =" & F_b_hor.ToString)
+
+
 
         '----------- Present massa traagheid overhung-------------
         TextBox35.Text = Round(J_shaft_a, 2).ToString           'Massa traagheid (0.5*M*R^2)
@@ -2855,21 +2866,22 @@ Public Class Form1
         TextBox191.Text = Round(g_shaft_b, 0).ToString
         TextBox193.Text = Round(g_shaft_c, 0).ToString
         TextBox190.Text = Round(gewicht_as, 0).ToString
+        TextBox370.Text = Round(gewicht_pulley, 0).ToString
 
         '----------- Present massa traagheid tussen de lagers-------------
         TextBox46.Text = Round(J_shaft_tussenb, 2).ToString      'Massa traagheid (0.5*M*R^2)
 
-        If RadioButton10.Checked Then
+        If RadioButton10.Checked Then   'Fan overhung
             GroupBox19.Visible = True
             GroupBox47.Visible = False
-            TextBox102.Text = Round(gewicht_as + gewicht_naaf + gewicht_pulley, 1).ToString 'Totaal gewicht impellar
+            TextBox102.Text = Round(gewicht_as, 0).ToString 'Totaal gewicht roterende delen
             Label117.Text = "Overhung"
             TextBox52.Text = TextBox190.Text    'Weight shaft  
             TextBox48.Text = TextBox41.Text    'Traagheid shaft  
-        Else
+        Else                            'Fan tussen de lagers
             GroupBox19.Visible = False
             GroupBox47.Visible = True
-            TextBox102.Text = Round(g_as_tussen_lagers + gewicht_naaf + gewicht_pulley, 1).ToString 'Totaal gewicht impellar
+            TextBox102.Text = Round(g_as_tussen_lagers, 0).ToString 'Totaal gewicht roterende delen
             Label117.Text = "Between bearings"
             TextBox52.Text = TextBox220.Text    'Weight shaft  
             TextBox48.Text = TextBox46.Text    'Traagheid shaft  
@@ -2879,10 +2891,8 @@ Public Class Form1
 
         '--------------- krachten---------------
         TextBox97.Text = Round(F_onbalans, 0).ToString      'Force inbalans
-        TextBox98.Text = Round(F_snaar, 0).ToString         'Force trekkracht snaar
-        TextBox99.Text = Round(F_scheef, 0).ToString        'Force scheefstelling (geen snaar)
-        TextBox100.Text = Round(F_a_combined, 0).ToString   'Force lager A hor+vert combined
-        TextBox101.Text = Round(F_b_combined, 0).ToString   'Force lager B hor+vert combined
+        TextBox100.Text = Round(F_a_vert, 0).ToString   'Force lager A hor+vert combined
+        TextBox101.Text = Round(F_b_vert, 0).ToString   'Force lager B hor+vert combined
         TextBox19.Text = Round(F_axial, 0).ToString         'Force axial
 
         '----------- eigen frequentie ---------------------
@@ -4310,8 +4320,8 @@ Public Class Form1
         oTable.Cell(row, 2).Range.Text = NumericUpDown11.Value
         oTable.Cell(row, 3).Range.Text = "[kg]"
         row += 1
-        oTable.Cell(row, 1).Range.Text = "Totaal gewicht waaier met as"
-        oTable.Cell(row, 2).Range.Text = TextBox192.Text
+        oTable.Cell(row, 1).Range.Text = "Som roterend gewicht"
+        oTable.Cell(row, 2).Range.Text = TextBox360.Text
         oTable.Cell(row, 3).Range.Text = "[kg]"
         row += 1
         oTable.Cell(row, 1).Range.Text = "Gewicht waaier tbv Campbell berekening"
@@ -4627,7 +4637,7 @@ Public Class Form1
             fan_load_torque = required_power_savety / rad                   '[N.m]
 
             '------------- inertia load--------------------
-            Double.TryParse(TextBox109.Text, impellar_inertia)
+            '  Double.TryParse(TextBox109.Text, impellar_inertia)
             impellar_inertia = impellar_inertia * NumericUpDown35.Value ^ 2     'in case speed ratio impeller/motor 
 
             '------------- inertia motor--------------------
@@ -4647,7 +4657,6 @@ Public Class Form1
         TextBox198.Text = Round(m_torque_max, 0).ToString               'Max torque [N.m]
         TextBox199.Text = Round(motor_inertia, 2).ToString              'Motor inertia [kg.m2]
         TextBox200.Text = Round(m_torque_rated, 0).ToString             'Rated torque [N.m]
-        TextBox202.Text = Round(impellar_inertia, 1).ToString           'impellar inertia [kg.m2]
         TextBox207.Text = Round(motor_inertia, 1).ToString              'motor inertia [kg.m2]
         NumericUpDown46.Value = Round(motor_inertia, 1).ToString        'motor inertia [kg.m2]
         TextBox213.Text = Round(total_inertia, 1).ToString              'Total inertia[kg.m2]
